@@ -42,7 +42,9 @@ ENV MOODLE_URL=https://github.com/moodle/moodle/archive/MOODLE_400_STABLE.tar.gz
     client_max_body_size=50M \
     post_max_size=50M \
     upload_max_filesize=50M \
-    max_input_vars=5000
+    max_input_vars=5000 \
+    CACHE_TYPE=file \
+    CACHE_PREFIX=mdl
 
 RUN curl --location $MOODLE_URL | tar xz --strip-components=1 -C /var/www/html/
 

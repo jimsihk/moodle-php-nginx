@@ -41,6 +41,33 @@ if [ ! -f /var/www/html/config.php ]; then
         --skip-database \
         --allow-unstable
 
+    echo "Using $CACHE_TYPE as cache"
+    case $CACHE_TYPE in
+        memcached)
+            # Check that the cache store is available
+            echo "Waiting for $CACHE_HOST:$CACHE_PORT to be ready"
+            while ! nc -w 1 $CACHE_HOST $CACHE_PORT; do
+                # Show some progress
+                echo -n '.';
+                sleep 1;
+            done
+            echo "$CACHE_HOST is ready"
+            # Give it another 3 seconds.
+            sleep 3;
+            if [ ! -z $CACHE_HOST ] && [ ! -z $CACHE_PORT ] ; then
+                sed -i '/require_once/i $CFG->session_handler_class = '\''\\core\\session\\memcached'\'';' /var/www/html/config.php
+                sed -i "/require_once/i \$CFG->session_memcached_save_path = '$CACHE_HOST:$CACHE_PORT';" /var/www/html/config.php
+                sed -i "/require_once/i \$CFG->session_memcached_prefix = '$CACHE_PREFIX.memc.sess.key.';" /var/www/html/config.php
+                sed -i '/require_once/i $CFG->session_memcached_acquire_lock_timeout = 120;' /var/www/html/config.php
+                sed -i '/require_once/i $CFG->session_memcached_lock_expire = 7200;' /var/www/html/config.php
+            fi
+            ;;
+        database)
+            sed -i '/require_once/i $CFG->session_handler_class = '\''\\core\\session\\database'\'';' /var/www/html/config.php
+            sed -i '/require_once/i $CFG->session_database_acquire_lock_timeout = 120;' /var/www/html/config.php
+            ;;
+    esac
+
     if [ "$SSLPROXY" = 'true' ]; then
         sed -i '/require_once/i $CFG->sslproxy=true;' /var/www/html/config.php
     fi

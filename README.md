@@ -2,7 +2,7 @@
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/erseco/alpine-moodle.svg)](https://hub.docker.com/r/erseco/alpine-moodle/)
 ![Docker Image Size](https://img.shields.io/docker/image-size/erseco/alpine-moodle)
-![nginx 1.20.1](https://img.shields.io/badge/nginx-1.18-brightgreen.svg)
+![nginx 1.22](https://img.shields.io/badge/nginx-1.22-brightgreen.svg)
 ![php 8.0](https://img.shields.io/badge/php-8.0-brightgreen.svg)
 ![moodle-4.0.2](https://img.shields.io/badge/moodle-4.0.2-yellow)
 ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
@@ -67,3 +67,7 @@ Define the ENV variables in docker-compose.yml file
 | post_max_size               | 50M                  |                                                                          |
 | upload_max_filesize         | 50M                  |                                                                          |
 | max_input_vars              | 5000                 |                                                                          |
+| CACHE_TYPE                  | file                 | file, memcached, database                                                |
+| CACHE_HOST                  |                      | Hostname of the external cache store, required for memcached             |
+| CACHE_PORT                  |                      | Memcached=11211, required for memcached                                  |
+| CACHE_PREFIX                | mdl                  | Cache prefix                                                             |
