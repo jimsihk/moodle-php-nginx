@@ -5,13 +5,13 @@
 set -eo pipefail
 
 # Check that the database is available
-echo "Waiting for $database:$port to be ready"
+echo "Waiting for $DB_HOST:$DB_PORT to be ready"
 while ! nc -w 1 $DB_HOST $DB_PORT; do
     # Show some progress
     echo -n '.';
     sleep 1;
 done
-echo "$database is ready"
+echo "$DB_HOST is ready"
 # Give it another 3 seconds.
 sleep 3;
 
