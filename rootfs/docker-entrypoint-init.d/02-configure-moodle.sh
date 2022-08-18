@@ -41,33 +41,6 @@ if [ ! -f /var/www/html/config.php ]; then
         --skip-database \
         --allow-unstable
 
-    echo "Using $CACHE_TYPE as cache"
-    case $CACHE_TYPE in
-        memcached)
-            # Check that the cache store is available
-            echo "Waiting for $CACHE_HOST:$CACHE_PORT to be ready"
-            while ! nc -w 1 $CACHE_HOST $CACHE_PORT; do
-                # Show some progress
-                echo -n '.';
-                sleep 1;
-            done
-            echo "$CACHE_HOST is ready"
-            # Give it another 3 seconds.
-            sleep 3;
-            if [ ! -z $CACHE_HOST ] && [ ! -z $CACHE_PORT ] ; then
-                sed -i '/require_once/i $CFG->session_handler_class = '\''\\core\\session\\memcached'\'';' /var/www/html/config.php
-                sed -i "/require_once/i \$CFG->session_memcached_save_path = '$CACHE_HOST:$CACHE_PORT';" /var/www/html/config.php
-                sed -i "/require_once/i \$CFG->session_memcached_prefix = '$CACHE_PREFIX.memc.sess.key.';" /var/www/html/config.php
-                sed -i '/require_once/i $CFG->session_memcached_acquire_lock_timeout = 120;' /var/www/html/config.php
-                sed -i '/require_once/i $CFG->session_memcached_lock_expire = 7200;' /var/www/html/config.php
-            fi
-            ;;
-        database)
-            sed -i '/require_once/i $CFG->session_handler_class = '\''\\core\\session\\database'\'';' /var/www/html/config.php
-            sed -i '/require_once/i $CFG->session_database_acquire_lock_timeout = 120;' /var/www/html/config.php
-            ;;
-    esac
-
     # Offload the file serving from PHP process
     sed -i '/require_once/i $CFG->xsendfile = '\''X-Accel-Redirect'\'';' /var/www/html/config.php
     sed -i '/require_once/i $CFG->xsendfilealiases = array('\''\/dataroot\/'\'' => $CFG->dataroot);' /var/www/html/config.php
@@ -80,6 +53,40 @@ if [ ! -f /var/www/html/config.php ]; then
     echo "\$CFG->preventexecpath = true;" >> /var/www/html/config.php
 
 fi
+
+# Function to change session caching settings
+config_session_cache() {
+  if [ -z $CACHE_TYPE ]; then
+    echo "Using default file session store"
+  else
+    echo "Using $CACHE_TYPE as session store"
+    case $CACHE_TYPE in
+        memcached)
+            # Check that the cache store is available
+            echo "Waiting for $CACHE_HOST:$CACHE_PORT to be ready..."
+            while ! nc -w 1 $CACHE_HOST $CACHE_PORT; do
+                # Show some progress
+                echo -n '.';
+                sleep 1;
+            done
+            echo "$CACHE_HOST is ready"
+            # Give it another 3 seconds.
+            sleep 3;
+            if [ ! -z $CACHE_HOST ] && [ ! -z $CACHE_PORT ] ; then
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_handler_class --set='\core\session\memcached'
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_save_path --set="$CACHE_HOST:$CACHE_PORT"
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_prefix --set="$CACHE_PREFIX.memc.sess.key."
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_acquire_lock_timeout --set=120
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_lock_expire --set=7200
+            fi
+            ;;
+        database)
+            php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_handler_class --set='\core\session\database'
+            php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_database_acquire_lock_timeout --set=120
+            ;;
+    esac
+  fi
+}
 
 # Check if the database is already installed
 if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
@@ -113,6 +120,9 @@ if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
     php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=noreplyaddress --set=$MOODLE_MAIL_NOREPLY_ADDRESS
     php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=emailsubjectprefix --set=$MOODLE_MAIL_PREFIX
     
+    # Set session cache store
+    config_session_cache
+    
     # Remove .swf (flash) plugin for security reasons DISABLED BECAUSE IS REQUIRED
     #php -d max_input_vars=10000 /var/www/html/admin/cli/uninstall_plugins.php --plugins=media_swf --run
 
@@ -126,5 +136,7 @@ else
     echo "Upgrading moodle..."
     php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --enable
     php -d max_input_vars=10000 /var/www/html/admin/cli/upgrade.php --non-interactive --allow-unstable
+    # Set session cache store
+    config_session_cache
     php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --disable
 fi
