@@ -71,3 +71,4 @@ Define the ENV variables in docker-compose.yml file
 | SESSION_CACHE_HOST          |                      | Hostname of the external cache store, required for memcached             |
 | SESSION_CACHE_PORT          |                      | Memcached=11211, required for memcached                                  |
 | SESSION_CACHE_PREFIX        | mdl                  | Cache prefix                                                             |
+| AUTO_UPDATE_MOODLE          | true                 | Set to false to disable checking and updating Moodle at docker start     |
