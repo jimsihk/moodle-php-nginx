@@ -67,7 +67,7 @@ Define the ENV variables in docker-compose.yml file
 | post_max_size               | 50M                  |                                                                          |
 | upload_max_filesize         | 50M                  |                                                                          |
 | max_input_vars              | 5000                 |                                                                          |
-| CACHE_TYPE                  | file                 | file, memcached, database                                                |
-| CACHE_HOST                  |                      | Hostname of the external cache store, required for memcached             |
-| CACHE_PORT                  |                      | Memcached=11211, required for memcached                                  |
-| CACHE_PREFIX                | mdl                  | Cache prefix                                                             |
+| SESSION_CACHE_TYPE          |                      | Optionally sets shared session cache store: memcached, database          |
+| SESSION_CACHE_HOST          |                      | Hostname of the external cache store, required for memcached             |
+| SESSION_CACHE_PORT          |                      | Memcached=11211, required for memcached                                  |
+| SESSION_CACHE_PREFIX        | mdl                  | Cache prefix                                                             |

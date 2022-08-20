@@ -56,26 +56,26 @@ fi
 
 # Function to change session caching settings
 config_session_cache() {
-  if [ -z $CACHE_TYPE ]; then
+  if [ -z $SESSION_CACHE_TYPE ]; then
     echo "Using default file session store"
   else
-    echo "Using $CACHE_TYPE as session store"
-    case $CACHE_TYPE in
+    echo "Using $SESSION_CACHE_TYPE as session store"
+    case $SESSION_CACHE_TYPE in
         memcached)
             # Check that the cache store is available
-            echo "Waiting for $CACHE_HOST:$CACHE_PORT to be ready..."
-            while ! nc -w 1 $CACHE_HOST $CACHE_PORT; do
+            echo "Waiting for $SESSION_CACHE_HOST:$SESSION_CACHE_PORT to be ready..."
+            while ! nc -w 1 $SESSION_CACHE_HOST $SESSION_CACHE_PORT; do
                 # Show some progress
                 echo -n '.';
                 sleep 1;
             done
-            echo "$CACHE_HOST is ready"
+            echo "$SESSION_CACHE_HOST is ready"
             # Give it another 3 seconds.
             sleep 3;
-            if [ ! -z $CACHE_HOST ] && [ ! -z $CACHE_PORT ] ; then
+            if [ ! -z $SESSION_CACHE_HOST ] && [ ! -z $SESSION_CACHE_PORT ] ; then
                 php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_handler_class --set='\core\session\memcached'
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_save_path --set="$CACHE_HOST:$CACHE_PORT"
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_prefix --set="$CACHE_PREFIX.memc.sess.key."
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_save_path --set="$SESSION_CACHE_HOST:$SESSION_CACHE_PORT"
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_prefix --set="$SESSION_CACHE_PREFIX.memc.sess.key."
                 php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_acquire_lock_timeout --set=120
                 php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_lock_expire --set=7200
             fi
