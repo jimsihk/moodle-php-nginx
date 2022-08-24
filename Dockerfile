@@ -1,5 +1,5 @@
 ARG ARCH=
-FROM ${ARCH}erseco/alpine-php-webserver:1.13.0
+FROM ${ARCH}jimsihk/alpine-php-nginx:1.0.0
 
 LABEL maintainer="Ernesto Serrano <info@ernesto.es>"
 

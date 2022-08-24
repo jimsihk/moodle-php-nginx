@@ -13,7 +13,7 @@ The image is only +/- 70MB large.
 Repository: https://github.com/erseco/alpine-moodle
 
 
-* Built on the lightweight image https://github.com/erseco/alpine-php-webserver
+* Built on the lightweight image https://github.com/jimsihk/alpine-php-nginx
 * Very small Docker image size (+/-70MB)
 * Uses PHP 8.0 for better performance, lower cpu usage & memory footprint
 * Multi-arch support: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x
