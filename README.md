@@ -1,7 +1,7 @@
 # Moodle on Alpine Linux
 
-[![Docker Pulls](https://img.shields.io/docker/pulls/erseco/alpine-moodle.svg)](https://hub.docker.com/r/erseco/alpine-moodle/)
-![Docker Image Size](https://img.shields.io/docker/image-size/erseco/alpine-moodle)
+[![Docker Pulls](https://img.shields.io/docker/pulls/jimsihk/alpine-moodle.svg)](https://hub.docker.com/r/jimsihk/alpine-moodle/)
+![Docker Image Size](https://img.shields.io/docker/image-size/jimsihk/alpine-moodle)
 ![nginx 1.22](https://img.shields.io/badge/nginx-1.22-brightgreen.svg)
 ![php 8.0](https://img.shields.io/badge/php-8.0-brightgreen.svg)
 ![moodle-4.0.3](https://img.shields.io/badge/moodle-4.0.3-yellow)
@@ -10,7 +10,7 @@
 Moodle setup for Docker, build on [Alpine Linux](http://www.alpinelinux.org/).
 The image is only +/- 70MB large.
 
-Repository: https://github.com/erseco/alpine-moodle
+Repository: https://github.com/jimsihk/alpine-moodle
 
 
 * Built on the lightweight image https://github.com/jimsihk/alpine-php-nginx
