@@ -1,7 +1,8 @@
 ARG ARCH=
 FROM ${ARCH}erseco/alpine-php-webserver:1.13.0
 
-LABEL maintainer="Ernesto Serrano <info@ernesto.es>"
+LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
+      Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux."
 
 USER root
 COPY --chown=nobody rootfs/ /
