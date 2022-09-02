@@ -12,7 +12,7 @@ services:
       - postgres:/var/lib/postgresql/data
 
   moodle:
-    image: erseco/alpine-moodle
+    image: jimsihk/alpine-moodle
     build: .
     restart: unless-stopped
     environment:
@@ -39,6 +39,11 @@ services:
       - SMTP_PROTOCOL=tls
       - MOODLE_MAIL_NOREPLY_ADDRESS=noreply@localhost
       - MOODLE_MAIL_PREFIX=[moodle]
+      - SESSION_CACHE_TYPE=database
+      - SESSION_CACHE_HOST=postgres
+      - SESSION_CACHE_PORT=5432
+      - SESSION_CACHE_PREFIX=mdl
+      - AUTO_UPDATE_MOODLE=true
     ports:
       - 80:8080
     volumes:
