@@ -19,6 +19,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Set short SHA
+        run: echo "SHORT_SHA=`echo ${{ github.sha }} | cut -c1-7`" >> $GITHUB_ENV
+      
       - name: Prepare
         id: prepare
         run: |
@@ -29,6 +32,10 @@ jobs:
 
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             TAGS="$TAGS,${{ env.IMAGE_NAME }}:latest"
+          fi
+
+          if [[ $VERSION == "dev" ]]; then
+            TAGS="$TAGS,${{ env.IMAGE_NAME }}:${VERSION}-${SHORT_SHA}"
           fi
 
           echo ::set-output name=platforms::${DOCKER_PLATFORMS}
