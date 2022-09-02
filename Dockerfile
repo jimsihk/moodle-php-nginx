@@ -9,14 +9,15 @@ COPY --chown=nobody rootfs/ /
 
 # crond needs root, so install dcron and cap package and set the capabilities
 # on dcron binary https://github.com/inter169/systs/blob/master/alpine/crond/README.md
-RUN apk add --no-cache dcron libcap php8-sodium php8-exif && \
+RUN apk add --no-cache dcron libcap php8-sodium php8-exif git && \
     chown nobody:nobody /usr/sbin/crond && \
     setcap cap_setgid=ep /usr/sbin/crond
 
 USER nobody
 
 # Change MOODLE_XX_STABLE for new versions
-ENV MOODLE_URL=https://github.com/moodle/moodle/archive/MOODLE_400_STABLE.tar.gz \
+ENV MOODLE_GIT_URL=https://github.com/moodle/moodle.git \
+    MODOLE_GIT_BRANCH=MOODLE_400_STABLE \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     SITE_URL=http://localhost \
@@ -47,5 +48,15 @@ ENV MOODLE_URL=https://github.com/moodle/moodle/archive/MOODLE_400_STABLE.tar.gz
     SESSION_CACHE_PREFIX=mdl \
     AUTO_UPDATE_MOODLE=true
 
-RUN curl --location $MOODLE_URL | tar xz --strip-components=1 -C /var/www/html/
+# Clean up unused file from base image
+RUN rm /var/www/html/index.php /var/www/html/test.html
 
+# Install from Git for easier upgrade in the future
+# - Using temporary storage to store the Git repo and copy back to working directory 
+#   to avoid deteched head and failure due to files exist in the directory
+# - Git depth is set to 1 and and single branch to reduce docker size while keeping
+#   the functionality of git pull from source
+RUN if [ -d /tmp/moodle ]; then rm -rf /tmp/moodle; fi && \
+    git clone $MOODLE_GIT_URL --branch $MODOLE_GIT_BRANCH --single-branch --depth 1 /tmp/moodle/ && \
+    cp -paR /tmp/moodle/. /var/www/html/ && \
+    rm -rf /tmp/moodle

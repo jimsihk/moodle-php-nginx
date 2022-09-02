@@ -8,13 +8,12 @@
 ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 
 Moodle setup for Docker, build on [Alpine Linux](http://www.alpinelinux.org/).
-The image is only +/- 80MB large.
 
 Repository: https://github.com/jimsihk/alpine-moodle
 
 
 * Built on the lightweight image https://github.com/jimsihk/alpine-php-nginx
-* Very small Docker image size (+/-80MB)
+* Smaller Docker image size (+/-150MB)
 * Uses PHP 8.0 for better performance, lower cpu usage & memory footprint
 * Multi-arch support: 386, amd64, arm/v6, arm/v7, arm64, ppc64le, s390x
 * Optimized for 100 concurrent users
@@ -23,7 +22,7 @@ Repository: https://github.com/jimsihk/alpine-moodle
 * Configured cron to run as non-privileged user https://github.com/gliderlabs/docker-alpine/issues/381#issuecomment-621946699
 * docker-compose sample with PostgreSQL
 * Configuration via ENV variables
-* Easily upgradable to new moodle versions
+* Easily upgradable to new moodle versions (via `MOODLE_GIT_URL` and `MOODLE_GIT_BRANCH`)
 * The servers Nginx, PHP-FPM run under a non-privileged user (nobody) to make it more secure
 * The logs of all the services are redirected to the output of the Docker container (visible with `docker logs -f <container name>`)
 * Follows the KISS principle (Keep It Simple, Stupid) to make it easy to understand and adjust the image to your needs
