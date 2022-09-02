@@ -1,12 +1,8 @@
 name: Scan docker image for security vulnerabilities
 
 on:
-  push:
-    branches: [ "dev" ]
-  pull_request:
-    branches: [ "dev" ]
   schedule:
-    - cron: '00 14 * * 5'
+    - cron: '00 18 * * *' #UTC
 
 permissions:
   contents: read
