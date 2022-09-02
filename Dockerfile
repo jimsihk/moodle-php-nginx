@@ -58,5 +58,6 @@ RUN rm /var/www/html/index.php /var/www/html/test.html
 #   the functionality of git pull from source
 RUN if [ -d /tmp/moodle ]; then rm -rf /tmp/moodle; fi && \
     git clone $MOODLE_GIT_URL --branch $MODOLE_GIT_BRANCH --single-branch --depth 1 /tmp/moodle/ && \
+    if [ -f /tmp/moodle/Gruntfile.js ]; then rm /tmp/moodle/Gruntfile.js; fi && \
     cp -paR /tmp/moodle/. /var/www/html/ && \
     rm -rf /tmp/moodle
