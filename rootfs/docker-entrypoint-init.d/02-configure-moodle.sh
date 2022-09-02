@@ -146,6 +146,7 @@ else
       fi
       echo "Upgrading moodle..."
       php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --enable
+      git -C /var/www/html pull
       php -d max_input_vars=10000 /var/www/html/admin/cli/upgrade.php --non-interactive --allow-unstable
       # Set session cache store
       config_session_cache
