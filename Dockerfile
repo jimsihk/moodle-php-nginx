@@ -4,14 +4,27 @@ FROM ${ARCH}jimsihk/alpine-php-nginx:1.0.1
 LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
       Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux."
 
+ARG PHP_RUNTIME=php8
+ARG PHP_VERSION="=8.0.22-r0"
+ARG DCRON_VERSION="=4.5-r7"
+ARG LIBCAP_VERSION="=2.64-r0"
+ARG GIT_VERSION="=2.36.2-r0"
+
 USER root
 COPY --chown=nobody rootfs/ /
 
 # crond needs root, so install dcron and cap package and set the capabilities
 # on dcron binary https://github.com/inter169/systs/blob/master/alpine/crond/README.md
-RUN apk add --no-cache dcron libcap php8-sodium php8-exif git && \
-    chown nobody:nobody /usr/sbin/crond && \
-    setcap cap_setgid=ep /usr/sbin/crond
+RUN apk add --no-cache \
+        dcron${DCRON_VERSION} \
+        libcap${LIBCAP_VERSION} \
+        ${PHP_RUNTIME}-sodium${PHP_VERSION} \
+        ${PHP_RUNTIME}-exif${PHP_VERSION} \
+        git${GIT_VERSION} \
+    && chown nobody:nobody /usr/sbin/crond \
+    && setcap cap_setgid=ep /usr/sbin/crond \
+    # Clean up unused files from base image
+    && rm /var/www/html/index.php /var/www/html/test.html
 
 USER nobody
 
@@ -48,16 +61,13 @@ ENV MOODLE_GIT_URL=https://github.com/moodle/moodle.git \
     SESSION_CACHE_PREFIX=mdl \
     AUTO_UPDATE_MOODLE=true
 
-# Clean up unused file from base image
-RUN rm /var/www/html/index.php /var/www/html/test.html
-
 # Install from Git for easier upgrade in the future
 # - Using temporary storage to store the Git repo and copy back to working directory 
 #   to avoid deteched head and failure due to files exist in the directory
 # - Git depth is set to 1 and and single branch to reduce docker size while keeping
 #   the functionality of git pull from source
-RUN if [ -d /tmp/moodle ]; then rm -rf /tmp/moodle; fi && \
-    git clone $MOODLE_GIT_URL --branch $MODOLE_GIT_BRANCH --single-branch --depth 1 /tmp/moodle/ && \
-    if [ -f /tmp/moodle/Gruntfile.js ]; then rm /tmp/moodle/Gruntfile.js; fi && \
-    cp -paR /tmp/moodle/. /var/www/html/ && \
-    rm -rf /tmp/moodle
+RUN if [ -d /tmp/moodle ]; then rm -rf /tmp/moodle; fi \
+    && git clone $MOODLE_GIT_URL --branch $MODOLE_GIT_BRANCH --single-branch --depth 1 /tmp/moodle/ \
+    && if [ -f /tmp/moodle/Gruntfile.js ]; then rm /tmp/moodle/Gruntfile.js; fi \
+    && cp -paR /tmp/moodle/. /var/www/html/ \
+    && rm -rf /tmp/moodle
