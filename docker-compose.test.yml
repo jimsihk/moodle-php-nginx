@@ -1,6 +1,7 @@
 version: '3.5'
 services:
   app:
+    image: ${TEST_IMAGE_NAME:-jimsihk/alpine-moodle:local}
     build: .
     environment:
       - SITE_URL=http://app:8080

@@ -11,6 +11,7 @@ on:
 env:
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
+  TEST_TAG: test-build
 
 jobs:
   build:
@@ -25,7 +26,7 @@ jobs:
       - name: Prepare
         id: prepare
         run: |
-          DOCKER_PLATFORMS=linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le,linux/s390x
+          DOCKER_PLATFORMS=linux/amd64,linux/arm/v7,linux/arm64,linux/386,linux/ppc64le,linux/s390x
 
           VERSION=${GITHUB_REF#refs/*/}
           TAGS="${{ env.IMAGE_NAME }}:${VERSION}"
@@ -40,7 +41,6 @@ jobs:
 
           echo ::set-output name=platforms::${DOCKER_PLATFORMS}
           echo ::set-output name=tags::${TAGS}
-          echo ::set-output name=version::${VERSION}
 
       - name: Set up QEMU
         id: qemu
@@ -62,19 +62,15 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build
+      - name: Build and Test
         run: |
-          docker buildx build .
-
-      - name: Test
-        run: |
-          docker-compose version
-          docker-compose --file docker-compose.test.yml up --exit-code-from sut --timeout 10 --build
+          export TEST_IMAGE_NAME=${{ env.IMAGE_NAME }}:${{ env.TEST_TAG }}
+          docker compose --file docker-compose.test.yml up --exit-code-from sut --timeout 10 --build
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: 'docker.io/${{ env.IMAGE_NAME }}:${{ steps.prepare.outputs.version }}'
+          image-ref: 'docker.io/${{ env.IMAGE_NAME }}:${{ env.TEST_TAG }}'
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
@@ -88,7 +84,7 @@ jobs:
       - name: Run the Anchore scan action itself with GitHub Advanced Security code scanning integration enabled
         uses: anchore/scan-action@v3
         with:
-          image: 'docker.io/${{ env.IMAGE_NAME }}:${{ steps.prepare.outputs.version }}'
+          image: 'docker.io/${{ env.IMAGE_NAME }}:${{ env.TEST_TAG }}'
           acs-report-enable: true
           fail-build: true
           severity-cutoff: high
@@ -106,7 +102,7 @@ jobs:
           tags: ${{ steps.prepare.outputs.tags }}
           platforms: ${{ steps.prepare.outputs.platforms }}
 
-      - name: Docker Hub Description
+      - name: Update Docker Hub Description
         uses: peter-evans/dockerhub-description@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
