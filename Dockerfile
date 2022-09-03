@@ -1,21 +1,23 @@
 ARG ARCH=
-FROM ${ARCH}jimsihk/alpine-php-nginx:1.0.1
+FROM ${ARCH}jimsihk/alpine-php-nginx:1.1.0
 
 LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
       Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux."
 
 ARG PHP_RUNTIME=php8
-ARG PHP_VERSION="=8.0.22-r0"
+ARG PHP_VERSION="=8.0.23-r0"
 ARG DCRON_VERSION="=4.5-r7"
 ARG LIBCAP_VERSION="=2.64-r0"
-ARG GIT_VERSION="=2.36.2-r0"
+ARG GIT_VERSION="=2.37.1-r1"
 
 USER root
 COPY --chown=nobody rootfs/ /
 
 # crond needs root, so install dcron and cap package and set the capabilities
 # on dcron binary https://github.com/inter169/systs/blob/master/alpine/crond/README.md
-RUN apk add --no-cache \
+RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main/" >> /etc/apk/repositories \
+    && echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
+    && apk add --no-cache \
         dcron${DCRON_VERSION} \
         libcap${LIBCAP_VERSION} \
         ${PHP_RUNTIME}-sodium${PHP_VERSION} \
