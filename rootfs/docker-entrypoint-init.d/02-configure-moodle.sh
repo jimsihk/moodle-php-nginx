@@ -133,7 +133,7 @@ if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
     sed -i 's/wwwroot/wwwroot\ \. \"\:8080\"/g' lib/classes/check/environment/publicpaths.php
 
 else
-    if [ -z AUTO_UPDATE_MOODLE ] || [ $AUTO_UPDATE_MOODLE = true ]; then
+    if [ -z $AUTO_UPDATE_MOODLE ] || [ $AUTO_UPDATE_MOODLE = true ]; then
       # Check current moodle maintenance status and keep in maintenance mode in case of manual enablement of it
       # This is also useful when deploying multiple moodle instances in a cluster using shared storage,
       # in order to avoid interruption to users while moodle restart
