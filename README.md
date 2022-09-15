@@ -3,8 +3,8 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/jimsihk/alpine-moodle.svg)](https://hub.docker.com/r/jimsihk/alpine-moodle/)
 ![Docker Image Size](https://img.shields.io/docker/image-size/jimsihk/alpine-moodle)
 ![nginx 1.22](https://img.shields.io/badge/nginx-1.22-brightgreen.svg)
-![php 8.0](https://img.shields.io/badge/php-8.0-brightgreen.svg)
-![moodle-4.0.3+](https://img.shields.io/badge/moodle-4.0.3+-yellow)
+![php 8.0.23](https://img.shields.io/badge/php-8.0.23-brightgreen.svg)
+![moodle-4.0.4+](https://img.shields.io/badge/moodle-4.0.4+-yellow)
 ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 
 Moodle setup for Docker, build on [Alpine Linux](http://www.alpinelinux.org/).
@@ -22,7 +22,7 @@ Repository: https://github.com/jimsihk/alpine-moodle
 * Configured cron to run as non-privileged user https://github.com/gliderlabs/docker-alpine/issues/381#issuecomment-621946699
 * docker-compose sample with PostgreSQL
 * Configuration via ENV variables
-* Easily upgradable to new moodle versions (via `MOODLE_GIT_URL` and `MOODLE_GIT_BRANCH`)
+* Easily upgradable to new Moodle versions (via `MOODLE_GIT_URL` and `MOODLE_GIT_BRANCH`) with auto upgrade at docker start
 * The servers Nginx, PHP-FPM run under a non-privileged user (nobody) to make it more secure
 * The logs of all the services are redirected to the output of the Docker container (visible with `docker logs -f <container name>`)
 * Follows the KISS principle (Keep It Simple, Stupid) to make it easy to understand and adjust the image to your needs
