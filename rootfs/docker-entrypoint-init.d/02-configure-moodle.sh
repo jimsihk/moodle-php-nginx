@@ -6,7 +6,7 @@ set -eo pipefail
 
 # Check that the database is available
 echo "Waiting for $DB_HOST:$DB_PORT to be ready"
-while ! nc -w 1 $DB_HOST $DB_PORT; do
+while ! nc -w 1 "$DB_HOST" "$DB_PORT"; do
     # Show some progress
     echo -n '.';
     sleep 1;
@@ -21,31 +21,34 @@ if [ ! -f /var/www/html/config.php ]; then
 
     echo "Generating config.php file..."
     ENV_VAR='var' php -d max_input_vars=10000 /var/www/html/admin/cli/install.php \
-        --lang=$MOODLE_LANGUAGE \
-        --wwwroot=$SITE_URL \
+        --lang="$MOODLE_LANGUAGE" \
+        --wwwroot="$SITE_URL" \
         --dataroot=/var/www/moodledata/ \
-        --dbtype=$DB_TYPE \
-        --dbhost=$DB_HOST \
-        --dbname=$DB_NAME \
-        --dbuser=$DB_USER \
-        --dbpass=$DB_PASS \
-        --dbport=$DB_PORT \
-        --prefix=$DB_PREFIX \
+        --dbtype="$DB_TYPE" \
+        --dbhost="$DB_HOST" \
+        --dbname="$DB_NAME" \
+        --dbuser="$DB_USER" \
+        --dbpass="$DB_PASS" \
+        --dbport="$DB_PORT" \
+        --prefix="$DB_PREFIX" \
         --fullname=Dockerized_Moodle \
         --shortname=moodle \
-        --adminuser=$MOODLE_USERNAME \
-        --adminpass=$MOODLE_PASSWORD \
-        --adminemail=$MOODLE_EMAIL \
+        --adminuser="$MOODLE_USERNAME" \
+        --adminpass="$MOODLE_PASSWORD" \
+        --adminemail="$MOODLE_EMAIL" \
         --non-interactive \
         --agree-license \
         --skip-database \
         --allow-unstable
 
     # Offload the file serving from PHP process
+    # shellcheck disable=SC2016
     sed -i '/require_once/i $CFG->xsendfile = '\''X-Accel-Redirect'\'';' /var/www/html/config.php
+    # shellcheck disable=SC2016
     sed -i '/require_once/i $CFG->xsendfilealiases = array('\''\/dataroot\/'\'' => $CFG->dataroot);' /var/www/html/config.php
 
     if [ "$SSLPROXY" = 'true' ]; then
+        # shellcheck disable=SC2016
         sed -i '/require_once/i $CFG->sslproxy=true;' /var/www/html/config.php
     fi
 
@@ -56,7 +59,7 @@ fi
 
 # Function to change session caching settings
 config_session_cache() {
-  if [ -z $SESSION_CACHE_TYPE ]; then
+  if [ -z "$SESSION_CACHE_TYPE" ]; then
     echo "Using default file session store"
   else
     echo "Using $SESSION_CACHE_TYPE as session store"
@@ -64,7 +67,7 @@ config_session_cache() {
         memcached)
             # Check that the cache store is available
             echo "Waiting for $SESSION_CACHE_HOST:$SESSION_CACHE_PORT to be ready..."
-            while ! nc -w 1 $SESSION_CACHE_HOST $SESSION_CACHE_PORT; do
+            while ! nc -w 1 "$SESSION_CACHE_HOST" "$SESSION_CACHE_PORT"; do
                 # Show some progress
                 echo -n '.';
                 sleep 1;
@@ -72,7 +75,7 @@ config_session_cache() {
             echo "$SESSION_CACHE_HOST is ready"
             # Give it another 3 seconds.
             sleep 3;
-            if [ ! -z $SESSION_CACHE_HOST ] && [ ! -z $SESSION_CACHE_PORT ] ; then
+            if [ -n "$SESSION_CACHE_HOST" ] && [ -n "$SESSION_CACHE_PORT" ] ; then
                 php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_handler_class --set='\core\session\memcached'
                 php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_save_path --set="$SESSION_CACHE_HOST:$SESSION_CACHE_PORT"
                 php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_prefix --set="$SESSION_CACHE_PREFIX.memc.sess.key."
@@ -93,10 +96,10 @@ if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
 
     echo "Installing database..."
     php -d max_input_vars=10000 /var/www/html/admin/cli/install_database.php \
-        --lang=$MOODLE_LANGUAGE \
-        --adminuser=$MOODLE_USERNAME \
-        --adminpass=$MOODLE_PASSWORD \
-        --adminemail=$MOODLE_EMAIL \
+        --lang="$MOODLE_LANGUAGE" \
+        --adminuser="$MOODLE_USERNAME" \
+        --adminpass="$MOODLE_PASSWORD" \
+        --adminemail="$MOODLE_EMAIL" \
         --fullname=Dockerized_Moodle \
         --shortname=moodle \
         --agree-license
@@ -113,12 +116,12 @@ if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
     php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=enableblogs --set=0
 
 
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtphosts --set=$SMTP_HOST:$SMTP_PORT
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtpuser --set=$SMTP_USER
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtppass --set=$SMTP_PASSWORD
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtpsecure --set=$SMTP_PROTOCOL
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=noreplyaddress --set=$MOODLE_MAIL_NOREPLY_ADDRESS
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=emailsubjectprefix --set=$MOODLE_MAIL_PREFIX
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtphosts --set="$SMTP_HOST":"$SMTP_PORT"
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtpuser --set="$SMTP_USER"
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtppass --set="$SMTP_PASSWORD"
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtpsecure --set="$SMTP_PROTOCOL"
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=noreplyaddress --set="$MOODLE_MAIL_NOREPLY_ADDRESS"
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=emailsubjectprefix --set="$MOODLE_MAIL_PREFIX"
     
     # Set session cache store
     config_session_cache
@@ -133,7 +136,7 @@ if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
     sed -i 's/wwwroot/wwwroot\ \. \"\:8080\"/g' lib/classes/check/environment/publicpaths.php
 
 else
-    if [ -z $AUTO_UPDATE_MOODLE ] || [ $AUTO_UPDATE_MOODLE = true ]; then
+    if [ -z "$AUTO_UPDATE_MOODLE" ] || [ "$AUTO_UPDATE_MOODLE" = true ]; then
       # Check current moodle maintenance status and keep in maintenance mode in case of manual enablement of it
       # This is also useful when deploying multiple moodle instances in a cluster using shared storage,
       # in order to avoid interruption to users while moodle restart
