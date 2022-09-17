@@ -83,6 +83,30 @@ config_session_cache() {
                 php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_lock_expire --set=7200
             fi
             ;;
+        redis)
+            # Check that the cache store is available
+            echo "Waiting for $SESSION_CACHE_HOST:$SESSION_CACHE_PORT to be ready..."
+            while ! nc -w 1 "$SESSION_CACHE_HOST" "$SESSION_CACHE_PORT"; do
+                # Show some progress
+                echo -n '.';
+                sleep 1;
+            done
+            echo "$SESSION_CACHE_HOST is ready"
+            # Give it another 3 seconds.
+            sleep 3;
+            if [ -n "$SESSION_CACHE_HOST" ] && [ -n "$SESSION_CACHE_PORT" ] ; then
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_handler_class --set='\core\session\redis'
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_host --set="$SESSION_CACHE_HOST"
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_port --set="$SESSION_CACHE_PORT"
+                if [ -n "$SESSION_CACHE_AUTH" ] ; then
+                    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_auth --set="$SESSION_CACHE_AUTH"
+                fi
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_prefix --set="$SESSION_CACHE_PREFIX"
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_acquire_lock_timeout --set=120
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_lock_expire --set=7200
+                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_serializer_use_igbinary --set='true'
+            fi
+            ;;
         database)
             php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_handler_class --set='\core\session\database'
             php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_database_acquire_lock_timeout --set=120
