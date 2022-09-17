@@ -158,31 +158,30 @@ if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
 
     # Fix publicpaths check to point to the internal container on port 8080
     sed -i 's/wwwroot/wwwroot\ \. \"\:8080\"/g' lib/classes/check/environment/publicpaths.php
+fi
 
+if [ -z "$AUTO_UPDATE_MOODLE" ] || [ "$AUTO_UPDATE_MOODLE" = true ]; then
+  # Check current moodle maintenance status and keep in maintenance mode in case of manual enablement of it
+  # This is also useful when deploying multiple moodle instances in a cluster using shared storage,
+  # in order to avoid interruption to users while moodle restart
+  echo "Checking maintenance status..."
+  START_IN_MAINT_MODE=false
+  MAINT_STATUS=$(php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php | sed 's/^==.*==//g' | sed '/^$/d')
+  if [ "$MAINT_STATUS" = 'Status: enabled' ]; then
+      echo "Maintenance mode will be kept enabled"
+      START_IN_MAINT_MODE=true
+  fi
+  echo "Upgrading moodle..."
+  php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --enable
+  git -C /var/www/html fetch origin "$MODOLE_GIT_BRANCH" --depth=1 && git -C /var/www/html checkout FETCH_HEAD -B "$MODOLE_GIT_BRANCH"
+  php -d max_input_vars=10000 /var/www/html/admin/cli/upgrade.php --non-interactive --allow-unstable
+  # Set session cache store
+  config_session_cache
+  if [ $START_IN_MAINT_MODE = false ]; then
+      php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --disable
+  else
+      echo "Started in maintenance mode, requires manual disable the maintenance mode"
+  fi
 else
-    if [ -z "$AUTO_UPDATE_MOODLE" ] || [ "$AUTO_UPDATE_MOODLE" = true ]; then
-      # Check current moodle maintenance status and keep in maintenance mode in case of manual enablement of it
-      # This is also useful when deploying multiple moodle instances in a cluster using shared storage,
-      # in order to avoid interruption to users while moodle restart
-      echo "Checking maintenance status..."
-      START_IN_MAINT_MODE=false
-      MAINT_STATUS=$(php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php | sed 's/^==.*==//g' | sed '/^$/d')
-      if [ "$MAINT_STATUS" = 'Status: enabled' ]; then
-          echo "Maintenance mode will be kept enabled"
-          START_IN_MAINT_MODE=true
-      fi
-      echo "Upgrading moodle..."
-      php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --enable
-      git -C /var/www/html pull
-      php -d max_input_vars=10000 /var/www/html/admin/cli/upgrade.php --non-interactive --allow-unstable
-      # Set session cache store
-      config_session_cache
-      if [ $START_IN_MAINT_MODE = false ]; then
-          php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --disable
-      else
-          echo "Started in maintenance mode, requires manual disable the maintenance mode"
-      fi
-    else
-      echo "Skipped auto update of Moodle"
-    fi
+  echo "Skipped auto update of Moodle"
 fi
