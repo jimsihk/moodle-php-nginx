@@ -49,8 +49,13 @@ if [ ! -f /var/www/html/config.php ]; then
 
     if [ "$SSLPROXY" = 'true' ]; then
         # shellcheck disable=SC2016
-        sed -i '/require_once/i $CFG->sslproxy=true;' /var/www/html/config.php
+        sed -i '/require_once/i $CFG->sslproxy = true;' /var/www/html/config.php
     fi
+
+    # Avoid cron failure by forcing to use database as lock factory
+    # https://moodle.org/mod/forum/discuss.php?d=328300#p1320902
+    # shellcheck disable=SC2016
+    sed -i '/require_once/i $CFG->lock_factory = '\''\\\\core\\\\lock\\\\db_record_lock_factory'\'';' /var/www/html/config.php
 
     # Avoid allowing executable paths to be set via the Admin GUI
     echo "\$CFG->preventexecpath = true;" >> /var/www/html/config.php
