@@ -43,6 +43,7 @@ ENV MOODLE_GIT_URL=https://github.com/moodle/moodle.git \
     DB_USER=moodle \
     DB_PASS=moodle \
     DB_PREFIX=mdl_ \
+    DB_DBHANDLEOPTIONS=false \
     SSLPROXY=false \
     MOODLE_EMAIL=user@example.com \
     MOODLE_LANGUAGE=en \

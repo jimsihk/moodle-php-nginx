@@ -40,6 +40,16 @@ if [ ! -f /var/www/html/config.php ]; then
         --agree-license \
         --skip-database \
         --allow-unstable
+        
+    # Set extra database settings
+    if [ -n "$DB_FETCHBUFFERSIZE" ]; then
+      # shellcheck disable=SC2016
+      sed -i "/$CFG->dboptions/a \ \ "\''fetchbuffersize'\'" => $DB_FETCHBUFFERSIZE," /var/www/html/config.php
+    fi
+    if [ "$DB_DBHANDLEOPTIONS" = 'true' ]; then
+      # shellcheck disable=SC2016
+      sed -i "/$CFG->dboptions/a \ \ "\''dbhandlesoptions'\'" => true," /var/www/html/config.php
+    fi
 
     # Offload the file serving from PHP process
     # shellcheck disable=SC2016
@@ -85,7 +95,6 @@ if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
     # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtogs --set=/usr/bin/gs
     # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtopython --set=/usr/bin/python3
     php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=enableblogs --set=0
-
 
     php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtphosts --set="$SMTP_HOST":"$SMTP_PORT"
     php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtpuser --set="$SMTP_USER"
