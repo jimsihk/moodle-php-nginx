@@ -62,6 +62,41 @@ if [ ! -f /var/www/html/config.php ]; then
 
 fi
 
+# Check if the database is already installed
+if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
+
+    echo "Installing database..."
+    php -d max_input_vars=10000 /var/www/html/admin/cli/install_database.php \
+        --lang="$MOODLE_LANGUAGE" \
+        --adminuser="$MOODLE_USERNAME" \
+        --adminpass="$MOODLE_PASSWORD" \
+        --adminemail="$MOODLE_EMAIL" \
+        --fullname=Dockerized_Moodle \
+        --shortname=moodle \
+        --agree-license
+
+    echo "Configuring settings..."
+
+    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=slasharguments --set=0
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtophp --set=/usr/bin/php
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtodu --set=/usr/bin/du
+    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=aspellpath --set=/usr/bin/aspell
+    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtodot --set=/usr/bin/dot
+    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtogs --set=/usr/bin/gs
+    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtopython --set=/usr/bin/python3
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=enableblogs --set=0
+
+
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtphosts --set="$SMTP_HOST":"$SMTP_PORT"
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtpuser --set="$SMTP_USER"
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtppass --set="$SMTP_PASSWORD"
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtpsecure --set="$SMTP_PROTOCOL"
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=noreplyaddress --set="$MOODLE_MAIL_NOREPLY_ADDRESS"
+    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=emailsubjectprefix --set="$MOODLE_MAIL_PREFIX"
+fi
+
+# Post installation setup
+
 # Function to change session caching settings
 config_session_cache() {
   if [ -z "$SESSION_CACHE_TYPE" ]; then
@@ -119,52 +154,19 @@ config_session_cache() {
     esac
   fi
 }
+# Set session cache store
+config_session_cache
 
-# Check if the database is already installed
-if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
+# Remove .swf (flash) plugin for security reasons DISABLED BECAUSE IS REQUIRED
+#php -d max_input_vars=10000 /var/www/html/admin/cli/uninstall_plugins.php --plugins=media_swf --run
 
-    echo "Installing database..."
-    php -d max_input_vars=10000 /var/www/html/admin/cli/install_database.php \
-        --lang="$MOODLE_LANGUAGE" \
-        --adminuser="$MOODLE_USERNAME" \
-        --adminpass="$MOODLE_PASSWORD" \
-        --adminemail="$MOODLE_EMAIL" \
-        --fullname=Dockerized_Moodle \
-        --shortname=moodle \
-        --agree-license
+# Avoid writing the config file
+chmod 440 config.php
 
-    echo "Configuring settings..."
+# Fix publicpaths check to point to the internal container on port 8080
+sed -i 's/wwwroot/wwwroot\ \. \"\:8080\"/g' lib/classes/check/environment/publicpaths.php
 
-    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=slasharguments --set=0
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtophp --set=/usr/bin/php
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtodu --set=/usr/bin/du
-    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=aspellpath --set=/usr/bin/aspell
-    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtodot --set=/usr/bin/dot
-    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtogs --set=/usr/bin/gs
-    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtopython --set=/usr/bin/python3
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=enableblogs --set=0
-
-
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtphosts --set="$SMTP_HOST":"$SMTP_PORT"
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtpuser --set="$SMTP_USER"
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtppass --set="$SMTP_PASSWORD"
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtpsecure --set="$SMTP_PROTOCOL"
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=noreplyaddress --set="$MOODLE_MAIL_NOREPLY_ADDRESS"
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=emailsubjectprefix --set="$MOODLE_MAIL_PREFIX"
-    
-    # Set session cache store
-    config_session_cache
-    
-    # Remove .swf (flash) plugin for security reasons DISABLED BECAUSE IS REQUIRED
-    #php -d max_input_vars=10000 /var/www/html/admin/cli/uninstall_plugins.php --plugins=media_swf --run
-
-    # Avoid writing the config file
-    chmod 444 config.php
-
-    # Fix publicpaths check to point to the internal container on port 8080
-    sed -i 's/wwwroot/wwwroot\ \. \"\:8080\"/g' lib/classes/check/environment/publicpaths.php
-fi
-
+# Update Moodle
 if [ -z "$AUTO_UPDATE_MOODLE" ] || [ "$AUTO_UPDATE_MOODLE" = true ]; then
   # Check current moodle maintenance status and keep in maintenance mode in case of manual enablement of it
   # This is also useful when deploying multiple moodle instances in a cluster using shared storage,
@@ -180,8 +182,6 @@ if [ -z "$AUTO_UPDATE_MOODLE" ] || [ "$AUTO_UPDATE_MOODLE" = true ]; then
   php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --enable
   git -C /var/www/html fetch origin "$MODOLE_GIT_BRANCH" --depth=1 && git -C /var/www/html checkout FETCH_HEAD -B "$MODOLE_GIT_BRANCH"
   php -d max_input_vars=10000 /var/www/html/admin/cli/upgrade.php --non-interactive --allow-unstable
-  # Set session cache store
-  config_session_cache
   if [ $START_IN_MAINT_MODE = false ]; then
       php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --disable
   else
