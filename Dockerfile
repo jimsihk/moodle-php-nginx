@@ -1,14 +1,15 @@
 ARG ARCH=
-FROM ${ARCH}jimsihk/alpine-php-nginx:1.1.2
+FROM ${ARCH}jimsihk/alpine-php-nginx:1.1.3
 
 LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
       Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux."
 
-ARG PHP_RUNTIME=php8
+ARG PHP_V=8
+ARG PHP_RUNTIME=php${PHP_V}
 ARG PHP_VERSION="=8.0.23-r0"
 ARG DCRON_VERSION="=4.5-r7"
 ARG LIBCAP_VERSION="=2.64-r0"
-ARG GIT_VERSION="=2.37.3-r0"
+ARG GIT_VERSION="=2.37.3-r1"
 
 USER root
 COPY --chown=nobody rootfs/ /
