@@ -24,6 +24,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main/" >> /etc/apk/reposito
         ${PHP_RUNTIME}-sodium${PHP_VERSION} \
         ${PHP_RUNTIME}-exif${PHP_VERSION} \
         git${GIT_VERSION} \
+        bash \
     && chown nobody:nobody /usr/sbin/crond \
     && setcap cap_setgid=ep /usr/sbin/crond \
     # Clean up unused files from base image
@@ -75,3 +76,9 @@ RUN if [ -d /tmp/moodle ]; then rm -rf /tmp/moodle; fi \
     && if [ -f /tmp/moodle/Gruntfile.js ]; then rm /tmp/moodle/Gruntfile.js; fi \
     && cp -paR /tmp/moodle/. /var/www/html/ \
     && rm -rf /tmp/moodle
+
+# Install additional plugins (a space separated arg), if any
+# Reference: https://github.com/krestomatio/container_builder/tree/master/moodle#moodle-plugins
+ARG ARG_MOODLE_PLUGIN_LIST=""
+ENV MOODLE_PLUGIN_LIST=${ARG_MOODLE_PLUGIN_LIST}
+RUN if [ -n "${MOODLE_PLUGIN_LIST}" ]; then /usr/libexec/moodle/install-plugin-list -p "${MOODLE_PLUGIN_LIST}"; fi

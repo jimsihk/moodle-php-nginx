@@ -22,7 +22,8 @@ Repository: https://github.com/jimsihk/alpine-moodle
 * Configured cron to run as non-privileged user https://github.com/gliderlabs/docker-alpine/issues/381#issuecomment-621946699
 * docker-compose sample with PostgreSQL
 * Configuration via ENV variables
-* Easily upgradable to new Moodle versions (via `MOODLE_GIT_URL` and `MOODLE_GIT_BRANCH`) with auto upgrade at docker start
+* Easily upgradable to new Moodle versions (via `MOODLE_GIT_URL` and `MOODLE_GIT_BRANCH`) with auto upgrade at docker start 
+* Moodle plug-in installation via docker build argument `ARG_MOODLE_PLUGIN_LIST`
 * The servers Nginx, PHP-FPM run under a non-privileged user (nobody) to make it more secure
 * The logs of all the services are redirected to the output of the Docker container (visible with `docker logs -f <container name>`)
 * Follows the KISS principle (Keep It Simple, Stupid) to make it easy to understand and adjust the image to your needs
@@ -74,3 +75,35 @@ Define the ENV variables in docker-compose.yml file
 | SESSION_CACHE_PREFIX        | mdl                  | Cache prefix                                                                                   |
 | SESSION_CACHE_AUTH          |                      | Authentication key for cache store, may be required for redis                                  |
 | AUTO_UPDATE_MOODLE          | true                 | Set to false to disable checking and updating Moodle at docker start                           |
+
+## Custom builds
+### Moodle plugins
+
+For installing plugins while building the main Dockerfile (slower), use `ARG_MOODLE_PLUGIN_LIST`:
+```
+docker buildx build . -t my_moodle_image:my_tag \
+    --build-arg ARG_MOODLE_PLUGIN_LIST='mod_attendance mod_checklist mod_customcert block_checklist gradeexport_checklist'
+```
+For building only to install additional moodle plugins (faster), create a Dockerfile like the following and then build.
+Example of `Dockerfile.plugins`:
+```dockerfile
+# Dockerfile.plugins
+FROM jimsihk/alpine-moodle:dev
+
+# Install additional plugins, a space separated arg, (optional)
+# Run install-plugin-list with argument "-f" to force install 
+#   if the plugin is not compatible with current Moodle version
+ARG ARG_MOODLE_PLUGIN_LIST=""
+ENV MOODLE_PLUGIN_LIST=${ARG_MOODLE_PLUGIN_LIST}
+RUN if [ -n "${MOODLE_PLUGIN_LIST}" ]; then /usr/libexec/moodle/install-plugin-list -p "${MOODLE_PLUGIN_LIST}"; fi && \
+    rm -rf /tmp/moodle-plugins
+```
+Example of build using `Dockerfile.plugins`:
+```
+# Build
+docker buildx build . -t my_moodle_image:my_tag \
+    -f Dockerfile.plugins \
+    --build-arg ARG_MOODLE_PLUGIN_LIST='mod_attendance mod_checklist mod_customcert block_checklist gradeexport_checklist'
+```
+## Credits
+- Plugin installation adopted from [Krestomatio](https://github.com/krestomatio/container_builder/tree/master/moodle)
