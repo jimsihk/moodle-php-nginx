@@ -64,7 +64,8 @@ ENV MOODLE_GIT_URL=https://github.com/moodle/moodle.git \
     upload_max_filesize=50M \
     max_input_vars=5000 \
     SESSION_CACHE_PREFIX=mdl \
-    AUTO_UPDATE_MOODLE=true
+    AUTO_UPDATE_MOODLE=true \
+    DISABLE_WEB_INSTALL_PLUGIN=false
 
 # Install from Git for easier upgrade in the future
 # - Using temporary storage to store the Git repo and copy back to working directory 

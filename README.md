@@ -80,6 +80,7 @@ Define the ENV variables in docker-compose.yml file
 | SESSION_CACHE_PREFIX        | mdl                  | Cache prefix                                                                                   |
 | SESSION_CACHE_AUTH          |                      | Authentication key for cache store, may be required for redis                                  |
 | AUTO_UPDATE_MOODLE          | true                 | Set to false to disable checking and updating Moodle at docker start                           |
+| DISABLE_WEB_INSTALL_PLUGIN  | false                | Set to true to disable plugin installation via site admin UI                                   |
 
 ## Custom builds
 ### Moodle plugins

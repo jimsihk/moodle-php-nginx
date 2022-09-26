@@ -199,6 +199,12 @@ config_session_cache
 # Remove .swf (flash) plugin for security reasons DISABLED BECAUSE IS REQUIRED
 #php -d max_input_vars=10000 /var/www/html/admin/cli/uninstall_plugins.php --plugins=media_swf --run
 
+# Disable plugin installation via the Admin GUI
+if [ "$DISABLE_WEB_INSTALL_PLUGIN" = 'true' ]; then
+  # shellcheck disable=SC2016
+  sed -i '/require_once/i $CFG->disableupdateautodeploy = true;' /var/www/html/config.php
+fi
+
 # Avoid writing the config file
 chmod 440 config.php
 
