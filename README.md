@@ -43,15 +43,20 @@ Define the ENV variables in docker-compose.yml file
 |-----------------------------|----------------------|------------------------------------------------------------------------------------------------|
 | LANG                        | en_US.UTF-8          |                                                                                                |
 | LANGUAGE                    | en_US:en             |                                                                                                |
-| SITE_URL                    | http://localhost     | Sets the public site url                                                                       |
+| SITE_URL                    | http://localhost     | Sets the public site URL                                                                       |
 | SSLPROXY                    | false                | Disable SSL proxy to avod site loop. Ej. Cloudfare                                             |
 | DB_TYPE                     | pgsql                | mysqli - pgsql - mariadb                                                                       |
-| DB_HOST                     | postgres             | DB_HOST Ej. db container name                                                                  |
+| DB_HOST                     | postgres             | Database hostname Ej. db container name                                                        |
 | DB_PORT                     | 5432                 | PostgresSQL=5432 - MySQL/MariaDB=3306                                                          |
-| DB_NAME                     | moodle               |                                                                                                |
-| DB_USER                     | moodle               |                                                                                                |
+| DB_NAME                     | moodle               | Database name                                                                                  |
+| DB_USER                     | moodle               | Database login username                                                                        |
+| DB_PASS                     | moodle               | Database login password                                                                        |
 | DB_FETCHBUFFERSIZE          |                      | Set to 0 if using PostgresSQL poolers like PgBouncer in 'transaction' mode                     |
 | DB_DBHANDLEOPTIONS          | false                | Set to true if using PostgresSQL poolers like PgBouncer which does not support sending options |
+| DB_HOST_REPLICA             |                      | Database hostname of the read-only replica database                                            |
+| DB_PORT_REPLICA             |                      | Database port of replica, left it empty to be same as DB_PORT                                  |
+| DB_USER_REPLICA             |                      | Database login username of replica, left it empty to be same as DB_USER                        |
+| DB_PASS_REPLICA             |                      | Database login password of replica, left it empty to be same as DB_PASS                        |
 | DB_PREFIX                   | mdl_                 | Database prefix. WARNING: don't use numeric values or moodle won't start                       |
 | MOODLE_EMAIL                | user@example.com     |                                                                                                |
 | MOODLE_LANGUAGE             | en                   |                                                                                                |
