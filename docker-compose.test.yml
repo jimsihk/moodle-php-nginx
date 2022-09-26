@@ -5,6 +5,7 @@ services:
     build: .
     environment:
       - SITE_URL=http://app:8080
+      - MOODLE_SITENAME=Dockerized_Moodle
     depends_on:
       - postgres
 

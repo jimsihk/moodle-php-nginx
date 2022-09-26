@@ -51,8 +51,8 @@ if [ ! -f /var/www/html/config.php ]; then
         --dbpass="$DB_PASS" \
         --dbport="$DB_PORT" \
         --prefix="$DB_PREFIX" \
-        --fullname=Dockerized_Moodle \
-        --shortname=moodle \
+        --fullname="$MOODLE_SITENAME" \
+        --shortname="$MOODLE_SHORTNAME" \
         --adminuser="$MOODLE_USERNAME" \
         --adminpass="$MOODLE_PASSWORD" \
         --adminemail="$MOODLE_EMAIL" \
@@ -111,8 +111,8 @@ if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
         --adminuser="$MOODLE_USERNAME" \
         --adminpass="$MOODLE_PASSWORD" \
         --adminemail="$MOODLE_EMAIL" \
-        --fullname=Dockerized_Moodle \
-        --shortname=moodle \
+        --fullname="$MOODLE_SITENAME" \
+        --shortname="$MOODLE_SHORTNAME" \
         --agree-license
 
     echo "Configuring settings..."
