@@ -81,4 +81,5 @@ RUN if [ -d /tmp/moodle ]; then rm -rf /tmp/moodle; fi \
 # Reference: https://github.com/krestomatio/container_builder/tree/master/moodle#moodle-plugins
 ARG ARG_MOODLE_PLUGIN_LIST=""
 ENV MOODLE_PLUGIN_LIST=${ARG_MOODLE_PLUGIN_LIST}
-RUN if [ -n "${MOODLE_PLUGIN_LIST}" ]; then /usr/libexec/moodle/install-plugin-list -p "${MOODLE_PLUGIN_LIST}"; fi
+RUN if [ -n "${MOODLE_PLUGIN_LIST}" ]; then /usr/libexec/moodle/install-plugin-list -p "${MOODLE_PLUGIN_LIST}"; fi && \
+    rm -rf /tmp/moodle-plugins
