@@ -1,12 +1,9 @@
 ARG ARCH=
-FROM ${ARCH}jimsihk/alpine-php-nginx:1.1.3
+FROM ${ARCH}jimsihk/alpine-php-nginx:80.24.0
 
 LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
       Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux."
 
-ARG PHP_V=8
-ARG PHP_RUNTIME=php${PHP_V}
-ARG PHP_VERSION="=8.0.23-r0"
 ARG DCRON_VERSION="=4.5-r7"
 ARG LIBCAP_VERSION="=2.64-r0"
 ARG GIT_VERSION="=2.37.3-r1"
@@ -33,8 +30,10 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main/" >> /etc/apk/reposito
 USER nobody
 
 # Change MOODLE_XX_STABLE for new versions
-ENV MOODLE_GIT_URL=https://github.com/moodle/moodle.git \
-    MODOLE_GIT_BRANCH=MOODLE_400_STABLE \
+ARG ARG_MOODLE_GIT_URL=https://github.com/moodle/moodle.git
+ARG ARG_MODOLE_GIT_BRANCH=MOODLE_400_STABLE
+ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
+    MODOLE_GIT_BRANCH=${ARG_MODOLE_GIT_BRANCH} \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     SITE_URL=http://localhost \
@@ -74,8 +73,9 @@ ENV MOODLE_GIT_URL=https://github.com/moodle/moodle.git \
 # - Git depth is set to 1 and and single branch to reduce docker size while keeping
 #   the functionality of git pull from source
 RUN if [ -d /tmp/moodle ]; then rm -rf /tmp/moodle; fi \
-    && git clone $MOODLE_GIT_URL --branch $MODOLE_GIT_BRANCH --single-branch --depth 1 /tmp/moodle/ \
+    && git clone "$MOODLE_GIT_URL" --branch "$MODOLE_GIT_BRANCH" --single-branch --depth 1 /tmp/moodle/ \
     && if [ -f /tmp/moodle/Gruntfile.js ]; then rm /tmp/moodle/Gruntfile.js; fi \
+    && if [ -f /tmp/moodle/config-dist.php ]; then rm /tmp/moodle/config-dist.php; fi \
     && cp -paR /tmp/moodle/. /var/www/html/ \
     && rm -rf /tmp/moodle
 
