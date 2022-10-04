@@ -6,7 +6,7 @@ LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
 
 ARG DCRON_VERSION="=4.5-r7"
 ARG LIBCAP_VERSION="=2.64-r0"
-ARG GIT_VERSION="=2.37.3-r1"
+ ARG GIT_VERSION="=2.38.0-r1"
 
 USER root
 COPY --chown=nobody rootfs/ /
