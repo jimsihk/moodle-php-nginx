@@ -5,7 +5,6 @@ on:
     tags: ['*']
     branches: ["dev"]
   pull_request:
-    tags: ['*']
     branches: ["dev"]
 
 env:
@@ -52,8 +51,6 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
         id: buildx
-        # with:
-        #   install: true
 
       - name: Login to DockerHub
         if: github.event_name != 'pull_request'
@@ -67,7 +64,17 @@ jobs:
           export TEST_IMAGE_NAME=${{ env.IMAGE_NAME }}:${{ env.TEST_TAG }}
           docker compose --file docker-compose.test.yml up --exit-code-from sut --timeout 10 --build
 
+      - name: Run Trivy vulnerability scanner for PR
+        if: github.event_name = 'pull_request'
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'docker.io/${{ env.IMAGE_NAME }}:${{ env.TEST_TAG }}'
+          format: 'table'
+          severity: 'CRITICAL,HIGH'
+          exit-code: 0
+
       - name: Run Trivy vulnerability scanner
+        if: github.event_name != 'pull_request'
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'docker.io/${{ env.IMAGE_NAME }}:${{ env.TEST_TAG }}'
@@ -77,11 +84,22 @@ jobs:
           exit-code: 0
 
       - name: Upload Trivy scan results to GitHub Security tab
+        if: github.event_name != 'pull_request'
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: 'trivy-results.sarif'
 
-      - name: Run the Anchore scan action itself with GitHub Advanced Security code scanning integration enabled
+      - name: Run the Anchore scan action for PR
+        if: github.event_name = 'pull_request'
+        uses: anchore/scan-action@v3
+        id: anchore-scan
+        with:
+          image: 'docker.io/${{ env.IMAGE_NAME }}:${{ env.TEST_TAG }}'
+          output-format: table
+          fail-build: false
+
+      - name: Run the Anchore scan action itself
+        if: github.event_name != 'pull_request'
         uses: anchore/scan-action@v3
         id: anchore-scan
         with:
@@ -90,11 +108,13 @@ jobs:
           fail-build: false
 
       - name: Upload Anchore Scan Report
+        if: github.event_name != 'pull_request'
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ${{ steps.anchore-scan.outputs.sarif }}
 
       - name: Build and push
+        if: github.event_name != 'pull_request'
         uses: docker/build-push-action@v3
         with:
           context: .
@@ -103,6 +123,7 @@ jobs:
           platforms: ${{ steps.prepare.outputs.platforms }}
 
       - name: Update Docker Hub Description
+        if: github.event_name != 'pull_request'
         uses: peter-evans/dockerhub-description@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
