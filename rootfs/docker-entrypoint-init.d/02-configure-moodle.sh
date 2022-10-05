@@ -201,8 +201,9 @@ config_session_cache
 
 # Disable plugin installation via the Admin GUI
 if [ "$DISABLE_WEB_INSTALL_PLUGIN" = 'true' ]; then
-  # shellcheck disable=SC2016
-  sed -i '/require_once/i $CFG->disableupdateautodeploy = true;' /var/www/html/config.php
+  php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=disableupdateautodeploy --set='true'
+else
+  php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=disableupdateautodeploy --set='false'
 fi
 
 # Avoid writing the config file
