@@ -201,9 +201,9 @@ config_session_cache
 
 # Disable plugin installation via the Admin GUI
 if [ "$DISABLE_WEB_INSTALL_PLUGIN" = 'true' ]; then
-  php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=disableupdateautodeploy --set='true'
+  php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=disableupdateautodeploy --set=1
 else
-  php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=disableupdateautodeploy --set='false'
+  php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=disableupdateautodeploy --set=0
 fi
 
 # Avoid writing the config file
