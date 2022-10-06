@@ -98,7 +98,7 @@ jobs:
           output-format: table
           fail-build: false
 
-      - name: Run the Anchore scan action itself
+      - name: Run the Anchore scan action
         if: github.event_name != 'pull_request'
         uses: anchore/scan-action@v3
         id: anchore-scan
