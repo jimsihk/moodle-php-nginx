@@ -6,7 +6,8 @@ LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
 
 ARG DCRON_VERSION="=4.5-r7"
 ARG LIBCAP_VERSION="=2.64-r0"
- ARG GIT_VERSION="=2.38.0-r1"
+ARG GIT_VERSION="=2.38.0-r1"
+ARG BASH_VERSION="=5.1.16-r2"
 
 USER root
 COPY --chown=nobody rootfs/ /
@@ -21,7 +22,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main/" >> /etc/apk/reposito
         ${PHP_RUNTIME}-sodium${PHP_VERSION} \
         ${PHP_RUNTIME}-exif${PHP_VERSION} \
         git${GIT_VERSION} \
-        bash \
+        bash${BASH_VERSION} \
     && chown nobody:nobody /usr/sbin/crond \
     && setcap cap_setgid=ep /usr/sbin/crond \
     # Clean up unused files from base image
