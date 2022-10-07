@@ -34,10 +34,12 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main/" >> /etc/apk/reposito
 USER nobody
 
 # Change MOODLE_XX_STABLE for new versions
-ARG ARG_MOODLE_GIT_URL=https://github.com/moodle/moodle.git
-ARG ARG_MODOLE_GIT_BRANCH=MOODLE_400_STABLE
+ARG ARG_MOODLE_GIT_URL='https://github.com/moodle/moodle.git'
+ARG ARG_MODOLE_GIT_BRANCH='MOODLE_400_STABLE'
+ARG ARG_MODOLE_GIT_COMMIT='b4493c2a1680171388bb204993340823147b4797'
 ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     MODOLE_GIT_BRANCH=${ARG_MODOLE_GIT_BRANCH} \
+    MOODLE_GIT_COMMIT=${ARG_MODOLE_GIT_COMMIT} \
     LANG=en_US.UTF-8 \
     LANGUAGE=en_US:en \
     SITE_URL=http://localhost \
@@ -59,7 +61,7 @@ ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     SMTP_HOST=smtp.gmail.com \
     SMTP_PORT=587 \
     SMTP_USER=your_email@gmail.com \
-    SMTP_PASSWORD=your_password \
+    SMTP_PASSWORD=your_password  \
     SMTP_PROTOCOL=tls \
     MOODLE_MAIL_NOREPLY_ADDRESS=noreply@localhost \
     MOODLE_MAIL_PREFIX=[moodle] \
@@ -77,15 +79,16 @@ ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
 # - Git depth is set to 1 and and single branch to reduce docker size while keeping
 #   the functionality of git pull from source
 RUN if [ -d /tmp/moodle ]; then rm -rf /tmp/moodle; fi \
-    && git clone "$MOODLE_GIT_URL" --branch "$MODOLE_GIT_BRANCH" --single-branch --depth 1 /tmp/moodle/ \
+    && git clone "${MOODLE_GIT_URL}" --branch "${MODOLE_GIT_BRANCH}" --single-branch --depth 1 /tmp/moodle/ \
     && if [ -f /tmp/moodle/Gruntfile.js ]; then rm /tmp/moodle/Gruntfile.js; fi \
     && if [ -f /tmp/moodle/config-dist.php ]; then rm /tmp/moodle/config-dist.php; fi \
     && cp -paR /tmp/moodle/. /var/www/html/ \
     && rm -rf /tmp/moodle
+RUN /usr/libexec/moodle/check-moodle-version "${MOODLE_GIT_COMMIT}"
 
-# Install additional plugins (a space separated arg), if any
+# Install additional plugins (a space separated arguement), if any
 # Reference: https://github.com/krestomatio/container_builder/tree/master/moodle#moodle-plugins
 ARG ARG_MOODLE_PLUGIN_LIST=""
 ENV MOODLE_PLUGIN_LIST=${ARG_MOODLE_PLUGIN_LIST}
-RUN if [ -n "${MOODLE_PLUGIN_LIST}" ]; then /usr/libexec/moodle/install-plugin-list -p "${MOODLE_PLUGIN_LIST}"; fi && \
-    rm -rf /tmp/moodle-plugins
+RUN if [ -n "${MOODLE_PLUGIN_LIST}" ]; then /usr/libexec/moodle/install-plugin-list -p "${MOODLE_PLUGIN_LIST}"; fi \
+    && rm -rf /tmp/moodle-plugins

@@ -1,0 +1,27 @@
+#!/bin/sh
+#
+# Moodle version checking script
+# Description: The script will take the inputted Git commit hash to compare 
+#              with the current version, returning error if different
+#
+
+CODE_PATH='/var/www/html'
+
+if [ -n "$1" ]
+then
+  MOODLE_VERSION=$(grep "\$version" "$CODE_PATH"/version.php | sed 's/ //g' | cut -d';' -f1 | cut -d '=' -f2)
+  CURRENT_COMMIT=$(git -C "$CODE_PATH" rev-parse HEAD)
+  TARGET_COMMIT="$1"
+  
+  echo "Downloaded Moodle version: $MOODLE_VERSION"
+  echo "Downloaded Git commit: $CURRENT_COMMIT"
+  
+  if [ "$CURRENT_COMMIT" != "$TARGET_COMMIT" ]
+  then
+    echo "Expecting Git commit: $TARGET_COMMIT"
+    exit 1
+  fi
+else
+  echo "Missing argument: <target commit hash>"
+  exit 2
+fi
