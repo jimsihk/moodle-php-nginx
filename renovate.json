@@ -11,5 +11,14 @@
       "automergeType": "pr",
       "platformAutomerge": true
     }
+  ],
+  "regexManagers": [
+    {
+      "fileMatch": ["^Dockerfile$"],
+      "matchStrings": [
+        "\\# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?) branch=(?<currentValue>.*?)( versioning=(?<versioning>.*?))?\\sARG .*?_GIT_COMMIT='?(?<currentDigest>.*)'\\s"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
   ]
 }
