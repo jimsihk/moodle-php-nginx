@@ -36,8 +36,8 @@ jobs:
             TAGS="$TAGS,${{ env.IMAGE_NAME }}:${VERSION}-${SHORT_SHA}"
           fi
 
-          echo ::set-output name=platforms::${DOCKER_PLATFORMS}
-          echo ::set-output name=tags::${TAGS}
+          echo "platforms=${DOCKER_PLATFORMS}" >> $GITHUB_OUTPUT
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
         id: qemu
