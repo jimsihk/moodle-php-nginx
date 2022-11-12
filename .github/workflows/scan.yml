@@ -2,7 +2,7 @@ name: Scan docker image for security vulnerabilities
 
 on:
   schedule:
-    - cron: '00 18 * * *' #UTC
+    - cron: '00 20 * * *' #UTC
 
 permissions:
   contents: read
