@@ -74,6 +74,7 @@ ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     max_input_vars=5000 \
     SESSION_CACHE_PREFIX=mdl \
     AUTO_UPDATE_MOODLE=true \
+    UPGRADE_MOODLE_CODE=true \
     DISABLE_WEB_INSTALL_PLUGIN=false
 
 # Install from Git for easier upgrade in the future

@@ -226,7 +226,10 @@ if [ -z "$AUTO_UPDATE_MOODLE" ] || [ "$AUTO_UPDATE_MOODLE" = true ]; then
   fi
   echo "Upgrading moodle..."
   php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --enable
-  git -C /var/www/html fetch origin "$MODOLE_GIT_BRANCH" --depth=1 && git -C /var/www/html checkout FETCH_HEAD -B "$MODOLE_GIT_BRANCH"
+  if [ -z "$UPDATE_MOODLE_CODE" ] || [ "$UPDATE_MOODLE_CODE" = true ]; then
+    echo "Checking moodle code version..."
+    git -C /var/www/html fetch origin "$MODOLE_GIT_BRANCH" --depth=1 && git -C /var/www/html checkout FETCH_HEAD -B "$MODOLE_GIT_BRANCH"
+  fi
   php -d max_input_vars=10000 /var/www/html/admin/cli/upgrade.php --non-interactive --allow-unstable
   if [ $START_IN_MAINT_MODE = false ]; then
       php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --disable
