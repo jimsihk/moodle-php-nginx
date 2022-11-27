@@ -98,7 +98,7 @@ Example of `Dockerfile.plugins`:
 # Dockerfile.plugins
 FROM jimsihk/alpine-moodle:dev
 
-# Install additional plugins, a space separated arg, (optional)
+# Install additional plugins, a space/comma separated arg, (optional)
 # Run install-plugin-list with argument "-f" to force install 
 #   if the plugin is not compatible with current Moodle version
 ARG ARG_MOODLE_PLUGIN_LIST=""
@@ -111,7 +111,7 @@ Example of build using `Dockerfile.plugins`:
 # Build
 docker buildx build . -t my_moodle_image:my_tag \
     -f Dockerfile.plugins \
-    --build-arg ARG_MOODLE_PLUGIN_LIST='mod_attendance mod_checklist mod_customcert block_checklist gradeexport_checklist'
+    --build-arg ARG_MOODLE_PLUGIN_LIST='mod_attendance,mod_checklist,mod_customcert,block_checklist,gradeexport_checklist'
 ```
 ## Credits
 - Plugin installation adopted from [Krestomatio](https://github.com/krestomatio/container_builder/tree/master/moodle)

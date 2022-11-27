@@ -89,7 +89,7 @@ RUN if [ -d /tmp/moodle ]; then rm -rf /tmp/moodle; fi \
     && rm -rf /tmp/moodle
 RUN /usr/libexec/moodle/check-moodle-version "${MOODLE_GIT_COMMIT}"
 
-# Install additional plugins (a space separated arguement), if any
+# Install additional plugins (a space/comma separated arguement), if any
 # Reference: https://github.com/krestomatio/container_builder/tree/master/moodle#moodle-plugins
 ARG ARG_MOODLE_PLUGIN_LIST=""
 ENV MOODLE_PLUGIN_LIST=${ARG_MOODLE_PLUGIN_LIST}
