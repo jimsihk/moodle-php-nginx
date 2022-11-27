@@ -4,12 +4,14 @@ FROM ${ARCH}jimsihk/alpine-php-nginx:80.25.1
 LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
       Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux."
 
+# renovate: datasource=repology depName=alpine_3_16/dcron versioning=loose
 ARG DCRON_VERSION="=4.5-r7"
+# renovate: datasource=repology depName=alpine_3_16/libcap versioning=loose
 ARG LIBCAP_VERSION="=2.64-r0"
+# renovate: datasource=repology depName=alpine_edge/git versioning=loose
 ARG GIT_VERSION="=2.38.1-r0"
+# renovate: datasource=repology depName=alpine_3_16/bash versioning=loose
 ARG BASH_VERSION="=5.1.16-r2"
-# Dependency of bash
-ARG READLINE_VERSION="=8.1.2-r0"
 
 USER root
 COPY --chown=nobody rootfs/ /

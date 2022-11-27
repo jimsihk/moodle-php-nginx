@@ -6,6 +6,7 @@
 ![php 8.0](https://img.shields.io/badge/php-8.0-brightgreen.svg)
 ![moodle-4.0](https://img.shields.io/badge/moodle-4.0-yellow)
 ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-yellow.svg)](https://app.renovatebot.com/dashboard)
 
 Moodle setup for Docker, build on [Alpine Linux](http://www.alpinelinux.org/).
 
