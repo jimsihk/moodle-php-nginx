@@ -37,9 +37,9 @@ USER nobody
 
 # Change MOODLE_XX_STABLE for new versions
 ARG ARG_MOODLE_GIT_URL='https://github.com/moodle/moodle.git'
-ARG ARG_MODOLE_GIT_BRANCH='MOODLE_400_STABLE'
-# renovate: datasource=git-refs depName=https://github.com/moodle/moodle branch=MOODLE_400_STABLE
-ARG ARG_MODOLE_GIT_COMMIT='efdaed1f70dadcbdbd58e2127c5968c27ae4bf57'
+ARG ARG_MODOLE_GIT_BRANCH='MOODLE_401_STABLE'
+# renovate: datasource=git-refs depName=https://github.com/moodle/moodle branch=MOODLE_401_STABLE
+ARG ARG_MODOLE_GIT_COMMIT='0ea3d45e04c3d54a3a472ddcb11606b30e227c50'
 ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     MODOLE_GIT_BRANCH=${ARG_MODOLE_GIT_BRANCH} \
     MOODLE_GIT_COMMIT=${ARG_MODOLE_GIT_COMMIT} \
