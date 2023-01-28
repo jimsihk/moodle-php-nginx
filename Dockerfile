@@ -13,6 +13,8 @@ ARG GIT_VERSION="=2.39.1-r1"
 # renovate: datasource=repology depName=alpine_3_16/bash versioning=loose
 ARG BASH_VERSION="=5.1.16-r2"
 
+ARG WEB_PATH='/var/www/html'
+
 USER root
 COPY --chown=nobody rootfs/ /
 
@@ -31,7 +33,7 @@ RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main/" >> /etc/apk/reposito
     && chown nobody:nobody /usr/sbin/crond \
     && setcap cap_setgid=ep /usr/sbin/crond \
     # Clean up unused files from base image
-    && rm /var/www/html/index.php /var/www/html/test.html
+    && rm ${WEB_PATH}/index.php ${WEB_PATH}/test.html
 
 USER nobody
 
@@ -82,13 +84,25 @@ ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
 #   to avoid deteched head and failure due to files exist in the directory
 # - Git depth is set to 1 and and single branch to reduce docker size while keeping
 #   the functionality of git pull from source
+ARG TEMP_MOODLE_PATH='/tmp/moodle'
 RUN if [ -d /tmp/moodle ]; then rm -rf /tmp/moodle; fi \
-    && git clone "${MOODLE_GIT_URL}" --branch "${MODOLE_GIT_BRANCH}" --single-branch --depth 1 /tmp/moodle/ \
-    && if [ -f /tmp/moodle/Gruntfile.js ]; then rm /tmp/moodle/Gruntfile.js; fi \
-    && if [ -f /tmp/moodle/config-dist.php ]; then rm /tmp/moodle/config-dist.php; fi \
-    && cp -paR /tmp/moodle/. /var/www/html/ \
-    && rm -rf /tmp/moodle
+    && git clone "${MOODLE_GIT_URL}" --branch "${MODOLE_GIT_BRANCH}" --single-branch --depth 1 ${TEMP_MOODLE_PATH}/ \
+    && if [ -f ${TEMP_MOODLE_PATH}/Gruntfile.js ]; then rm ${TEMP_MOODLE_PATH}/Gruntfile.js; fi \
+    && if [ -f ${TEMP_MOODLE_PATH}/config-dist.php ]; then rm ${TEMP_MOODLE_PATH}/config-dist.php; fi \
+    && cp -paR ${TEMP_MOODLE_PATH}/. ${WEB_PATH}/ \
+    && rm -rf ${TEMP_MOODLE_PATH}
 RUN /usr/libexec/moodle/check-moodle-version "${MOODLE_GIT_COMMIT}"
+
+# Install plugin for Redis Sentinel as cache store
+ARG ARG_REDISSENTINEL_PLUGIN_GIT_URL='https://github.com/catalyst/moodle-cachestore_redissentinel.git'
+ARG ARG_REDISSENTINEL_PLUGIN_GIT_BRANCH='master'
+# renovate: datasource=git-refs depName=https://github.com/catalyst/moodle-cachestore_redissentinel branch=master
+ARG ARG_REDISSENTINEL_PLUGIN_GIT_COMMIT='b495e8f36a81fd1a2a414e34a978da879c473f31'
+ENV REDISSENTINEL_PLUGIN_GIT_URL=${ARG_REDISSENTINEL_PLUGIN_GIT_URL} \
+    REDISSENTINEL_PLUGIN_GIT_BRANCH=${ARG_REDISSENTINEL_PLUGIN_GIT_BRANCH} \
+    REDISSENTINEL_PLUGIN_GIT_COMMIT=${ARG_REDISSENTINEL_PLUGIN_GIT_COMMIT}
+RUN git clone "${REDISSENTINEL_PLUGIN_GIT_URL}" --branch "${REDISSENTINEL_PLUGIN_GIT_BRANCH}" --depth 1 ${WEB_PATH}/cache/stores/redissentinel/
+RUN /usr/libexec/check-git-commit "${WEB_PATH}/cache/stores/redissentinel/" "${REDISSENTINEL_PLUGIN_GIT_COMMIT}"
 
 # Install additional plugins (a space/comma separated arguement), if any
 # Reference: https://github.com/krestomatio/container_builder/tree/master/moodle#moodle-plugins

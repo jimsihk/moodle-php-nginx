@@ -1,0 +1,33 @@
+#!/bin/sh
+#
+# Git commit version checking script
+# Description: The script will take the inputted Git commit hash to compare 
+#              with the current version, returning error if different
+#
+
+if [ -n "$1" ] || [ -n "$2" ]
+then
+  if [ -d "$1" ]
+  then
+    CODE_PATH="$1"
+    CURRENT_COMMIT=$(git -C "$CODE_PATH" rev-parse HEAD)
+    TARGET_COMMIT="$2"
+  
+    echo "Downloaded Git commit at $CODE_PATH: $CURRENT_COMMIT"
+  
+    if [ "$CURRENT_COMMIT" != "$TARGET_COMMIT" ]
+    then
+      echo "Expecting Git commit: $TARGET_COMMIT, mismatch"
+      exit 1
+    else
+      echo "Git commit matched"
+      exit 0
+    fi
+  else
+    echo "Invalid git path [$CODE_PATH]"
+    exit 2
+  fi
+else
+  echo "Missing argument: <local git path> <target commit hash>"
+  exit 3
+fi
