@@ -23,8 +23,9 @@ Repository: https://github.com/jimsihk/alpine-moodle
 * Configured cron to run as non-privileged user https://github.com/gliderlabs/docker-alpine/issues/381#issuecomment-621946699
 * docker-compose sample with PostgreSQL
 * Configuration via ENV variables
-* Easily upgradable to new Moodle versions (via `ARG_MOODLE_GIT_URL` and `ARG_MOODLE_GIT_BRANCH` at build time, `MOODLE_GIT_URL` and `MOODLE_GIT_BRANCH` at run time) with auto upgrade at docker start 
-* Moodle plug-in installation via docker build argument `ARG_MOODLE_PLUGIN_LIST`
+* Easily upgrade to newer Moodle versions (via `ARG_MOODLE_GIT_URL` and `ARG_MOODLE_GIT_BRANCH` at build time, `MOODLE_GIT_URL` and `MOODLE_GIT_BRANCH` at run time) with auto upgrade at docker start 
+* Moodle plug-in pre-installation at docker build time with argument `ARG_MOODLE_PLUGIN_LIST`
+* Supports multiple cache stores: memcached, Redis, Redis Sentinel
 * The servers NGINX, PHP-FPM run under a non-privileged user (nobody) to make it more secure
 * The logs of all the services are redirected to the output of the Docker container (visible with `docker logs -f <container name>`)
 * Follows the KISS principle (Keep It Simple, Stupid) to make it easy to understand and adjust the image to your needs
