@@ -94,13 +94,10 @@ RUN if [ -d /tmp/moodle ]; then rm -rf /tmp/moodle; fi \
 RUN /usr/libexec/moodle/check-moodle-version "${MOODLE_GIT_COMMIT}"
 
 # Install plugin for Redis Sentinel as cache store
-ARG ARG_REDISSENTINEL_PLUGIN_GIT_URL='https://github.com/catalyst/moodle-cachestore_redissentinel.git'
-ARG ARG_REDISSENTINEL_PLUGIN_GIT_BRANCH='master'
+ARG REDISSENTINEL_PLUGIN_GIT_URL='https://github.com/catalyst/moodle-cachestore_redissentinel.git'
+ARG REDISSENTINEL_PLUGIN_GIT_BRANCH='master'
 # renovate: datasource=git-refs depName=https://github.com/catalyst/moodle-cachestore_redissentinel branch=master
-ARG ARG_REDISSENTINEL_PLUGIN_GIT_COMMIT='b495e8f36a81fd1a2a414e34a978da879c473f31'
-ENV REDISSENTINEL_PLUGIN_GIT_URL=${ARG_REDISSENTINEL_PLUGIN_GIT_URL} \
-    REDISSENTINEL_PLUGIN_GIT_BRANCH=${ARG_REDISSENTINEL_PLUGIN_GIT_BRANCH} \
-    REDISSENTINEL_PLUGIN_GIT_COMMIT=${ARG_REDISSENTINEL_PLUGIN_GIT_COMMIT}
+ARG REDISSENTINEL_PLUGIN_GIT_COMMIT='b495e8f36a81fd1a2a414e34a978da879c473f31'
 RUN git clone "${REDISSENTINEL_PLUGIN_GIT_URL}" --branch "${REDISSENTINEL_PLUGIN_GIT_BRANCH}" --depth 1 ${WEB_PATH}/cache/stores/redissentinel/
 RUN /usr/libexec/check-git-commit "${WEB_PATH}/cache/stores/redissentinel/" "${REDISSENTINEL_PLUGIN_GIT_COMMIT}"
 
