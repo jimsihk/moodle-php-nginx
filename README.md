@@ -15,7 +15,7 @@ Repository: https://github.com/jimsihk/alpine-moodle
 * Based on official Moodle source https://github.com/moodle/moodle
 * Built on the lightweight image https://github.com/jimsihk/alpine-php-nginx
 * Smaller Docker image size (+/-150MB)
-* Uses PHP 8.0 for better performance, lower cpu usage & memory footprint
+* Uses PHP 8.0 for better performance, lower cpu usage & memory footprint (Note: PHP 8.1 is not yet officially supported by Moodle, see [here](https://moodledev.io/general/development/policies/php#php-81))
 * Multi-arch support: 386, amd64, arm/v7, arm64, ppc64le, s390x
 * Optimized for 100 concurrent users
 * Optimized to only use resources when there's traffic (by using PHP-FPM's ondemand PM)
@@ -25,7 +25,7 @@ Repository: https://github.com/jimsihk/alpine-moodle
 * Configuration via ENV variables
 * Easily upgrade to newer Moodle versions (via `ARG_MOODLE_GIT_URL` and `ARG_MOODLE_GIT_BRANCH` at build time, `MOODLE_GIT_URL` and `MOODLE_GIT_BRANCH` at run time) with auto upgrade at docker start 
 * Moodle plug-in pre-installation at docker build time with argument `ARG_MOODLE_PLUGIN_LIST`
-* Supports multiple cache stores: memcached, Redis, Redis Sentinel
+* Supports multiple type of cache stores: memcached, Redis, Redis Sentinel (plugin from [catalyst](https://github.com/catalyst/moodle-cachestore_redissentinel))
 * The servers NGINX, PHP-FPM run under a non-privileged user (nobody) to make it more secure
 * The logs of all the services are redirected to the output of the Docker container (visible with `docker logs -f <container name>`)
 * Follows the KISS principle (Keep It Simple, Stupid) to make it easy to understand and adjust the image to your needs
@@ -46,7 +46,7 @@ Define the ENV variables in docker-compose.yml file
 | LANG                        | en_US.UTF-8          |                                                                                                                      |
 | LANGUAGE                    | en_US:en             |                                                                                                                      |
 | SITE_URL                    | http://localhost     | Sets the public site URL                                                                                             |
-| SSLPROXY                    | false                | Disable SSL proxy to avoid site loop. e.g. Cloudfare                                                                 |
+| SSLPROXY                    | false                | Disable SSL proxy to avoid site loop. e.g. Cloudflare                                                                |
 | DB_TYPE                     | pgsql                | mysqli - pgsql - mariadb                                                                                             |
 | DB_HOST                     | postgres             | Database hostname e.g. db container name                                                                             |
 | DB_PORT                     | 5432                 | PostgresSQL=5432 - MySQL/MariaDB=3306                                                                                |
@@ -77,7 +77,7 @@ Define the ENV variables in docker-compose.yml file
 | post_max_size               | 50M                  |                                                                                                                      |
 | upload_max_filesize         | 50M                  |                                                                                                                      |
 | max_input_vars              | 5000                 |                                                                                                                      |
-| SESSION_CACHE_TYPE          |                      | Optionally sets shared session cache store: memcached, redis, database                                               |
+| SESSION_CACHE_TYPE          |                      | Optionally sets shared session cache store: memcached, redis, database _(leave it blank to keep unchanged)_          |
 | SESSION_CACHE_HOST          |                      | Hostname of the external cache store, required for memcached and redis                                               |
 | SESSION_CACHE_PORT          |                      | Memcached=11211, Redis=6379, required for memcached and redis                                                        |
 | SESSION_CACHE_PREFIX        | mdl                  | Cache prefix                                                                                                         |
