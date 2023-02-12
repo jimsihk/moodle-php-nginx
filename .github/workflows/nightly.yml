@@ -16,7 +16,7 @@ env:
   IMAGE_TAG: nightly
 
 jobs:
-  nightly_build:
+  nightly-build:
     permissions:
       contents: read # for actions/checkout to fetch code
       packages: write # for docker/build-push-action to store image to package
@@ -49,10 +49,16 @@ jobs:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
     uses: ./.github/workflows/scan.yml
-    needs: [nightly_build]
+    needs: [nightly-build]
     with:
       # image: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
       image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly
 
-  
-
+  tag-and-release:
+    permissions:
+      contents: write # for ncipollo/release-action to create release
+    uses: ./.github/workflows/auto-release.yml
+    needs: [scan-nightly-build]
+    with:
+      target_branches: "feature/auto-publish"
+      image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly

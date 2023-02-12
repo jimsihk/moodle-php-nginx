@@ -1,0 +1,94 @@
+name: Identify changes and tag for release
+
+on:
+  workflow_call:
+    inputs:
+      target_branches:
+        required: true
+        type: string
+      image:
+        required: true
+        type: string
+  # push:
+  #   branches: ["feature/auto-publish"]
+  # schedule:
+    # - cron: '00 21 * * *' #UTC
+
+env:
+  # github.repository as <account>/<repo>
+  # IMAGE_NAME: ${{ github.repository }}
+
+permissions:
+  contents: read # for actions/checkout to fetch code
+
+jobs:
+  auto-tagging:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get next version
+        id: next_tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: patch
+          release_branches: ${{ inputs.target_branches }}
+          dry_run: true
+
+      - name: Get latest Moodle version
+        id: moodle_version
+        run: |
+          docker run -i ${{ inputs.image }} cat /var/www/html/version.php > version.txt
+          MOODLE_VERSION=$(grep "\$version" version.txt | sed 's/ //g' | cut -d';' -f1 | cut -d '=' -f2)
+          MOODLE_RELEASE=$(grep "\$release" version.txt | sed 's/ //g' | cut -d';' -f1 | cut -d '=' -f2 | sed "s/'//g")
+          MOODLE_BRANCH=$(grep "\$branch" version.txt | sed 's/ //g' | cut -d';' -f1 | cut -d '=' -f2 | sed "s/'//g")
+          echo "version=${MOODLE_VERSION}" >> $GITHUB_OUTPUT
+          echo "release=${MOODLE_RELEASE}" >> $GITHUB_OUTPUT
+          echo "branch=${MOODLE_BRANCH}" >> $GITHUB_OUTPUT
+
+          # format moodle version number to tag format
+          # <branch>.<version (last 4 digits, leading zero removed)>.0
+          MOODLE_TAG="$MOODLE_BRANCH.`echo $MOODLE_VERSION | cut -d'.' -f1 | cut -c9- | sed 's/^0*//'``echo $MOODLE_VERSION | cut -d'.' -f2`.0"
+          echo "tag=${MOODLE_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Determine change
+        id: get_changes
+        run: |
+          echo "[${{ steps.moodle_version.outputs.tag }}] vs [${{ steps.next_tag_version.outputs.new_version }}]"
+          if [ -n ${{ steps.next_tag_version.outputs.new_version }} ] && [ "${{ steps.next_tag_version.outputs.new_version }}" != 'undefined' ]
+          then
+            # Compare up to minor version
+            PREFIX_MOODLE_TAG=`echo ${{ steps.moodle_version.outputs.tag }} | cut -d'.' -f1,2`
+            PREFIX_NEW_TAG=`echo ${{ steps.next_tag_version.outputs.new_version }} | cut -d'.' -f1,2`
+            if [ "$PREFIX_MOODLE_TAG" = "$PREFIX_NEW_TAG" ];
+            then
+              # same Moodle minor version
+              echo "Use ${{ steps.next_tag_version.outputs.new_version }}"
+              echo "new_tag=${{ steps.next_tag_version.outputs.new_version }}" >> $GITHUB_OUTPUT
+            else
+              # Moodle minor version changed
+              echo "Use ${{ steps.moodle_version.outputs.tag }}"
+              echo "new_tag=${{ steps.moodle_version.outputs.tag }}" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "No change is detected"
+            echo "new_tag=${{ steps.next_tag_version.outputs.new_version }}" >> $GITHUB_OUTPUT
+          fi
+
+      # - name: Bump version
+      #   id: bump_tag
+      #   uses: mathieudutour/github-tag-action@v6.1
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     custom_tag: ${{ steps.get_changes.outputs.new_tag }}
+
+      - name: Tag and create a GitHub release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.get_changes.outputs.new_tag }}-alpha
+          name: Test ${{ steps.bump_tag.outputs.new_tag }}
+          skipIfReleaseExists: true
+          allowUpdates: false
+          generateReleaseNotes: true
