@@ -1,4 +1,4 @@
-name: Identify changes and tag for release
+name: Identify changes, tag and release
 
 on:
   workflow_call:
@@ -29,7 +29,7 @@ jobs:
           release_branches: .*
           dry_run: true
 
-      - name: Get latest Moodle version
+      - name: Get container Moodle version
         id: moodle_version
         run: |
           docker run -i ${{ inputs.image }} cat /var/www/html/version.php > version.txt
@@ -44,6 +44,10 @@ jobs:
           # <branch>.<version (last 4 digits, leading zero removed)>.0
           MOODLE_TAG="$MOODLE_BRANCH.`echo $MOODLE_VERSION | cut -d'.' -f1 | cut -c9- | sed 's/^0*//'``echo $MOODLE_VERSION | cut -d'.' -f2`.0"
           echo "tag=${MOODLE_TAG}" >> $GITHUB_OUTPUT
+
+          echo "Moodle version: ${MOODLE_VERSION}
+          echo "Moodle release: ${MOODLE_RELEASE}
+          echo "Container tag: ${MOODLE_TAG}
 
       - name: Determine change
         id: get_changes
@@ -69,12 +73,18 @@ jobs:
             echo "new_tag=${{ steps.next_tag_version.outputs.new_version }}" >> $GITHUB_OUTPUT
           fi
 
+      - name: Generate release name
+        id: release_detail
+        run: |
+          RELEASE_NAME="v`echo ${{ steps.moodle_version.outputs.release }} | cut -d' ' -f1 | sed 's/\+//g'`.`echo ${{ steps.moodle_version.outputs.release }} | cut -d'.' -f2`-`echo ${{ steps.get_changes.outputs.new_tag }} | cut -d'.' -f3"
+          echo "release_name=$RELEASE_NAME" >> $GITHUB_OUTPUT
+
       - name: Tag and create a GitHub release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.get_changes.outputs.new_tag }}
           commit: ${{ github.sha }}
-          name: Test ${{ steps.get_changes.outputs.new_tag }}
+          name: Test ${{ steps.release_detail.outputs.release_name }}
           skipIfReleaseExists: true
           allowUpdates: false
           generateReleaseNotes: true
