@@ -59,5 +59,4 @@ jobs:
     uses: ./.github/workflows/auto-release.yml
     needs: [scan-nightly-build]
     with:
-      target_branch: ${GITHUB_REF#refs/*/}
       image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly
