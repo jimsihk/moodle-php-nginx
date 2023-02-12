@@ -69,18 +69,11 @@ jobs:
             echo "new_tag=${{ steps.next_tag_version.outputs.new_version }}" >> $GITHUB_OUTPUT
           fi
 
-      # - name: Bump version
-      #   id: bump_tag
-      #   uses: mathieudutour/github-tag-action@v6.1
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     custom_tag: ${{ steps.get_changes.outputs.new_tag }}
-
       - name: Tag and create a GitHub release
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.get_changes.outputs.new_tag }}
-          commit: $${ inputs.target_branch }
+          commit: ${{ inputs.target_branch }}
           name: Test ${{ steps.get_changes.outputs.new_tag }}
           skipIfReleaseExists: true
           allowUpdates: false
