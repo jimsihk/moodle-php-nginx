@@ -47,7 +47,8 @@ jobs:
   scan-nightly-build:
     uses: ./.github/workflows/scan.yml
     with:
-      image: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+      # image: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+      image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly
 
   
 
