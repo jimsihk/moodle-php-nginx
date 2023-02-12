@@ -50,7 +50,7 @@ jobs:
         id: get_changes
         run: |
           echo "[${{ steps.moodle_version.outputs.tag }}] vs [${{ steps.next_tag_version.outputs.new_version }}]"
-          if [ -n ${{ steps.next_tag_version.outputs.new_version }} ] && [ "${{ steps.next_tag_version.outputs.new_version }}" != 'undefined' ]
+          if [ -n "${{ steps.next_tag_version.outputs.new_version }}" ]
           then
             # Compare up to minor version
             PREFIX_MOODLE_TAG=`echo ${{ steps.moodle_version.outputs.tag }} | cut -d'.' -f1,2`
@@ -67,7 +67,7 @@ jobs:
             fi
           else
             echo "No change is detected"
-            echo "new_tag=${{ steps.next_tag_version.outputs.new_version }}" >> $GITHUB_OUTPUT
+            echo "new_tag=${{ steps.next_tag_version.outputs.previous_version }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Generate release name
