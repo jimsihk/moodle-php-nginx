@@ -11,7 +11,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   auto-tagging:
@@ -77,13 +77,11 @@ jobs:
       #     custom_tag: ${{ steps.get_changes.outputs.new_tag }}
 
       - name: Tag and create a GitHub release
-        permissions:
-          contents: write
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.get_changes.outputs.new_tag }}
           commit: $${ inputs.target_branch }
-          name: Test ${{ steps.bump_tag.outputs.new_tag }}
+          name: Test ${{ steps.get_changes.outputs.new_tag }}
           skipIfReleaseExists: true
           allowUpdates: false
           generateReleaseNotes: true
