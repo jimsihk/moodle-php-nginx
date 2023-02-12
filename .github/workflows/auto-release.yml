@@ -45,9 +45,9 @@ jobs:
           MOODLE_TAG="$MOODLE_BRANCH.`echo $MOODLE_VERSION | cut -d'.' -f1 | cut -c9- | sed 's/^0*//'``echo $MOODLE_VERSION | cut -d'.' -f2`.0"
           echo "tag=${MOODLE_TAG}" >> $GITHUB_OUTPUT
 
-          echo "Moodle version: ${MOODLE_VERSION}
-          echo "Moodle release: ${MOODLE_RELEASE}
-          echo "Container tag: ${MOODLE_TAG}
+          echo "Moodle version: ${MOODLE_VERSION}"
+          echo "Moodle release: ${MOODLE_RELEASE}"
+          echo "Container tag: ${MOODLE_TAG}"
 
       - name: Determine change
         id: get_changes
