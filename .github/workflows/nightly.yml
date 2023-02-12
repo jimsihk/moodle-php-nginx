@@ -1,0 +1,53 @@
+name: Nightly Build
+
+on:
+  # schedule:
+  #   - cron: '00 20 * * *' #UTC
+  push:
+    branches: ["feature/auto-publish"]
+
+permissions:
+  contents: read
+
+env:
+  # github.repository as <account>/<repo>
+  NIGHTLY_REGISTRY: ${{ var.REGISTRY_NIGHTLY }}
+  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_TAG: nightly
+
+jobs:
+  build:
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      packages: write # for docker/build-push-action to store image to package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to the Nightly Container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.NIGHTLY_REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Test
+        run: |
+          export TEST_IMAGE_NAME=${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          docker compose --file docker-compose.test.yml up --exit-code-from sut --timeout 10 --build
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.NIGHTLY_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+  scan-nightly-build:
+    uses: ./.github/workflows/scan.yml
+    with:
+      image: ${{ var.REGISTRY_NIGHTLY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+  
+  
