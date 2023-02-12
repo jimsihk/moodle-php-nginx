@@ -73,7 +73,6 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.get_changes.outputs.new_tag }}
-          commit: ${{ inputs.target_branch }}
           name: Test ${{ steps.get_changes.outputs.new_tag }}
           skipIfReleaseExists: true
           allowUpdates: false
