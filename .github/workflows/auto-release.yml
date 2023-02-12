@@ -14,12 +14,12 @@ on:
   # schedule:
     # - cron: '00 21 * * *' #UTC
 
-env:
+# env:
   # github.repository as <account>/<repo>
   # IMAGE_NAME: ${{ github.repository }}
 
-permissions:
-  contents: read # for actions/checkout to fetch code
+# permissions:
+#   contents: read # for actions/checkout to fetch code
 
 jobs:
   auto-tagging:
