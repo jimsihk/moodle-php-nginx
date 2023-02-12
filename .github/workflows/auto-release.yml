@@ -3,9 +3,6 @@ name: Identify changes, tag and release
 on:
   workflow_call:
     inputs:
-      target_branch:
-        required: true
-        type: string
       image:
         required: true
         type: string
@@ -25,7 +22,7 @@ jobs:
         uses: mathieudutour/github-tag-action@v6.1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: patch
+          default_bump: none
           release_branches: .*
           dry_run: true
 
@@ -76,8 +73,9 @@ jobs:
       - name: Generate release name
         id: release_detail
         run: |
-          RELEASE_NAME="v`echo ${{ steps.moodle_version.outputs.release }} | cut -d' ' -f1 | sed 's/\+//g'`.`echo ${{ steps.moodle_version.outputs.release }} | cut -d'.' -f2`-`echo ${{ steps.get_changes.outputs.new_tag }} | cut -d'.' -f3`"
-          echo "release_name=$RELEASE_NAME" >> $GITHUB_OUTPUT
+          R_NAME="v`echo ${{ steps.moodle_version.outputs.release }} | sed 's/ //g' | cut -d'(' -f1 | sed 's/\+//g'`.`echo ${{ steps.moodle_version.outputs.release }} | cut -d'.' -f2`-`echo ${{ steps.get_changes.outputs.new_tag }} | cut -d'.' -f3`"
+          echo "release_name=$R_NAME" >> $GITHUB_OUTPUT
+          echo "Release name: $R_NAME"
 
       - name: Tag and create a GitHub release
         uses: ncipollo/release-action@v1
