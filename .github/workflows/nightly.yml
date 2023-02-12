@@ -57,6 +57,6 @@ jobs:
     permissions:
       contents: write # for ncipollo/release-action to create release
     uses: ./.github/workflows/auto-release.yml
-    needs: [scan-nightly-build]
+    needs: [build-container]
     with:
       image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly
