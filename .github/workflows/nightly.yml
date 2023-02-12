@@ -16,7 +16,7 @@ env:
   IMAGE_TAG: nightly
 
 jobs:
-  build:
+  nightly_build:
     permissions:
       contents: read # for actions/checkout to fetch code
       packages: write # for docker/build-push-action to store image to package
@@ -49,6 +49,7 @@ jobs:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
     uses: ./.github/workflows/scan.yml
+    needs: [nightly_build]
     with:
       # image: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
       image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly

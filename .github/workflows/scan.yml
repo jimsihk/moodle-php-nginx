@@ -7,21 +7,18 @@ on:
         required: true
         type: string
 
-permissions:
-  contents: read
-
 env:
   IMAGE: ${{ inputs.image }}
 
 jobs:
   scan:
     permissions:
-      contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Logging
+        run: |
+          echo "Scanning ${{ env.IMAGE }}..."
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
