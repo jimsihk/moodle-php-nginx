@@ -10,8 +10,8 @@ permissions:
   contents: read
 
 env:
+  IMAGE_REGISTRY: ${{ vars.REGISTRY_NIGHTLY }}
   # github.repository as <account>/<repo>
-  NIGHTLY_REGISTRY: ${{ var.REGISTRY_NIGHTLY }}
   IMAGE_NAME: ${{ github.repository }}
   IMAGE_TAG: nightly
 
@@ -28,7 +28,7 @@ jobs:
       - name: Log in to the Nightly Container registry
         uses: docker/login-action@v2
         with:
-          registry: ${{ env.NIGHTLY_REGISTRY }}
+          registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -42,12 +42,12 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ env.NIGHTLY_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          tags: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
   scan-nightly-build:
     uses: ./.github/workflows/scan.yml
     with:
-      image: ${{ var.REGISTRY_NIGHTLY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+      image: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
 
   
-  
+
