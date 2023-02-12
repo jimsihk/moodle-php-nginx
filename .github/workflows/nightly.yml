@@ -16,7 +16,7 @@ env:
   IMAGE_TAG: nightly
 
 jobs:
-  nightly-build:
+  build-container:
     permissions:
       contents: read # for actions/checkout to fetch code
       packages: write # for docker/build-push-action to store image to package
