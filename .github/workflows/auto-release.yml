@@ -73,7 +73,10 @@ jobs:
       - name: Generate release name
         id: release_detail
         run: |
-          R_NAME=v`echo "${{ steps.moodle_version.outputs.release }}" | sed 's/ //g' | cut -d'(' -f1 | sed 's/\+//g'`.`echo "${{ steps.moodle_version.outputs.release }}" | cut -d'.' -f2`-`echo "${{ steps.get_changes.outputs.new_tag }}" | cut -d'.' -f3`"
+          R1=`echo "${{ steps.moodle_version.outputs.release }}" | sed 's/ //g' | cut -d'(' -f1 | sed 's/\+//g'`
+          R2=`echo "${{ steps.moodle_version.outputs.version }}" | cut -d'.' -f2`
+          R3=`echo "${{ steps.get_changes.outputs.new_tag }}" | cut -d'.' -f3`
+          R_NAME="v$R1.$R2-$R3"
           echo "release_name=$R_NAME" >> $GITHUB_OUTPUT
           echo "Release name: $R_NAME"
 
