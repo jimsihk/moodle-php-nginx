@@ -39,8 +39,8 @@ jobs:
       - name: Get next version
         id: next_tag_version
         run: |
-          echo "new_version=${{ bump_version.new_tag }} >> $GITHUB_OUTPUT
-          echo "previous_version=${{ bump_version.tag }} >> $GITHUB_OUTPUT
+          echo "new_version=${{ steps.bump_version.outputs.new_tag }} >> $GITHUB_OUTPUT
+          echo "previous_version=${{ steps.bump_version.outputs.tag }} >> $GITHUB_OUTPUT
           
       - name: Get container Moodle version
         id: moodle_version
