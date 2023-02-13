@@ -17,21 +17,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-#       - name: Load tag history and suggest next tag
-#         id: analyze_tag_history
-#         uses: mathieudutour/github-tag-action@v6.1
-#         with:
-#           github_token: ${{ secrets.GITHUB_TOKEN }}
-#           default_bump: false
-#           release_branches: ${{ vars.RELEASE_BRANCHES }}
-#           dry_run: true
-
-#       - name: Get next version
-#         id: next_tag_version
-#         run: |
-#           echo "new_tag=${{ steps.analyze_tag_history.outputs.new_version }} >> $GITHUB_OUTPUT
-#           echo "previous_tag=${{ steps.analyze_tag_history.outputs.previous_version }} >> $GITHUB_OUTPUT
-
       - name: Load tag history and suggest next tag
         id: analyze_tag_history
         uses: anothrNick/github-tag-action@1.61.0
@@ -42,7 +27,7 @@ jobs:
           DEFAULT_BUMP: patch
           RELEASE_BRANCHES: ${{ vars.RELEASE_BRANCHES }}
           
-      - name: Get next version
+      - name: Set next version
         id: next_tag_version
         run: |
           echo "new_tag=${{ steps.analyze_tag_history.outputs.new_tag }}" >> $GITHUB_OUTPUT
@@ -61,7 +46,11 @@ jobs:
 
           # format moodle version number to tag format
           # <branch>.<version (last 4 digits, leading zero removed)>.0
-          MOODLE_TAG="$MOODLE_BRANCH.`echo $MOODLE_VERSION | cut -d'.' -f1 | cut -c9- | sed 's/^0*//'``echo $MOODLE_VERSION | cut -d'.' -f2`.0"
+          # e.g. branch 401 & version 2022112801.04 of v4.1.1 --> 401.104.0
+          T1=$MOODLE_BRANCH
+          T2=`echo $MOODLE_VERSION | cut -d'.' -f1 | cut -c9- | sed 's/^0*//'`
+          T3=`echo $MOODLE_VERSION | cut -d'.' -f2`
+          MOODLE_TAG="$T1.$T2$T3.0"
           echo "tag=${MOODLE_TAG}" >> $GITHUB_OUTPUT
 
           echo "Moodle version: ${MOODLE_VERSION}"
