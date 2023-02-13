@@ -6,6 +6,7 @@ on:
     branches: ["dev"]
 
 env:
+  IMAGE_REGISTRY: ${{ vars.REGISTRY_PUBLIC }}
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   TEST_TAG: test-build
@@ -53,6 +54,7 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
+          registry: ${{ env.IMAGE_REGISTRY }}
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
