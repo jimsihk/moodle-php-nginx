@@ -26,13 +26,13 @@ jobs:
           DRY_RUN: true
           DEFAULT_BUMP: patch
           RELEASE_BRANCHES: ${{ vars.RELEASE_BRANCHES }}
-          
+
       - name: Set next version
         id: next_tag_version
         run: |
           echo "new_tag=${{ steps.analyze_tag_history.outputs.new_tag }}" >> $GITHUB_OUTPUT
           echo "previous_tag=${{ steps.analyze_tag_history.outputs.tag }}" >> $GITHUB_OUTPUT
-          
+
       - name: Get container Moodle version
         id: moodle_version
         run: |
