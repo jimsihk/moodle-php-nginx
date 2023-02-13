@@ -96,7 +96,7 @@ jobs:
         with:
           tag: ${{ steps.get_changes.outputs.new_tag }}
           commit: ${{ github.sha }}
-          name: Test ${{ steps.release_detail.outputs.release_name }}
+          name: ${{ steps.release_detail.outputs.release_name }}
           skipIfReleaseExists: true
           allowUpdates: false
           generateReleaseNotes: true
