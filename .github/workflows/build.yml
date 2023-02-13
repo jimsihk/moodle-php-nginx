@@ -20,7 +20,7 @@ jobs:
 
       - name: Set short SHA
         run: echo "SHORT_SHA=`echo ${{ github.sha }} | cut -c1-7`" >> $GITHUB_ENV
-      
+
       - name: Prepare
         id: prepare
         run: |
