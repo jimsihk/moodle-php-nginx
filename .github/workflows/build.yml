@@ -4,7 +4,10 @@ on:
   push:
     tags: ['*']
     branches: ["dev"]
-
+    paths-ignore:
+      - README.md
+      - .github/workflows/update-dockerhub-desc.yml
+      - LICENSE
 env:
   IMAGE_REGISTRY: ${{ vars.REGISTRY_PUBLIC }}
   # github.repository as <account>/<repo>
