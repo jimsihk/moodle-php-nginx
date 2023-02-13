@@ -23,7 +23,7 @@ jobs:
 #         with:
 #           github_token: ${{ secrets.GITHUB_TOKEN }}
 #           default_bump: false
-#           release_branches: .*
+#           release_branches: ${{ vars.RELEASE_BRANCHES }}
 #           dry_run: true
 
 #       - name: Get next version
@@ -40,13 +40,13 @@ jobs:
           WITH_V: false
           DRY_RUN: true
           DEFAULT_BUMP: patch
-          RELEASE_BRANCHES: .*
+          RELEASE_BRANCHES: ${{ vars.RELEASE_BRANCHES }}
           
       - name: Get next version
         id: next_tag_version
         run: |
-          echo "new_tag=${{ steps.analyze_tag_history.outputs.new_tag }} >> $GITHUB_OUTPUT
-          echo "previous_tag=${{ steps.analyze_tag_history.outputs.tag }} >> $GITHUB_OUTPUT
+          echo "new_tag=${{ steps.analyze_tag_history.outputs.new_tag }}" >> $GITHUB_OUTPUT
+          echo "previous_tag=${{ steps.analyze_tag_history.outputs.tag }}" >> $GITHUB_OUTPUT
           
       - name: Get container Moodle version
         id: moodle_version
