@@ -17,15 +17,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+#       - name: Get next version
+#         id: next_tag_version
+#         uses: mathieudutour/github-tag-action@v6.1
+#         with:
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           default_bump: false
+#           release_branches: .*
+#           dry_run: true
+
+      - name: Bump version and push tag
+        id: bump_version
+        uses: anothrNick/github-tag-action@1.61.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: false
+          DRY_RUN: true
+          DEFAULT_BUMP: none
+          RELEASE_BRANCHES: .*
+          
       - name: Get next version
         id: next_tag_version
-        uses: mathieudutour/github-tag-action@v6.1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: false
-          release_branches: .*
-          dry_run: true
-
+        run: |
+          echo "new_version=${{ bump_version.new_tag }} >> $GITHUB_OUTPUT
+          echo "previous_version=${{ bump_version.tag }} >> $GITHUB_OUTPUT
+          
       - name: Get container Moodle version
         id: moodle_version
         run: |
