@@ -17,8 +17,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-#       - name: Get next version
-#         id: next_tag_version
+#       - name: Load tag history and suggest next tag
+#         id: analyze_tag_history
 #         uses: mathieudutour/github-tag-action@v6.1
 #         with:
 #           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -26,21 +26,27 @@ jobs:
 #           release_branches: .*
 #           dry_run: true
 
-      - name: Bump version and push tag
-        id: bump_version
+#       - name: Get next version
+#         id: next_tag_version
+#         run: |
+#           echo "new_tag=${{ steps.analyze_tag_history.outputs.new_version }} >> $GITHUB_OUTPUT
+#           echo "previous_tag=${{ steps.analyze_tag_history.outputs.previous_version }} >> $GITHUB_OUTPUT
+
+      - name: Load tag history and suggest next tag
+        id: analyze_tag_history
         uses: anothrNick/github-tag-action@1.61.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: false
           DRY_RUN: true
-          DEFAULT_BUMP: none
+          DEFAULT_BUMP: patch
           RELEASE_BRANCHES: .*
           
       - name: Get next version
         id: next_tag_version
         run: |
-          echo "new_version=${{ steps.bump_version.outputs.new_tag }} >> $GITHUB_OUTPUT
-          echo "previous_version=${{ steps.bump_version.outputs.tag }} >> $GITHUB_OUTPUT
+          echo "new_tag=${{ steps.analyze_tag_history.outputs.new_tag }} >> $GITHUB_OUTPUT
+          echo "previous_tag=${{ steps.analyze_tag_history.outputs.tag }} >> $GITHUB_OUTPUT
           
       - name: Get container Moodle version
         id: moodle_version
@@ -65,17 +71,17 @@ jobs:
       - name: Determine change
         id: get_changes
         run: |
-          echo "[${{ steps.moodle_version.outputs.tag }}] vs [${{ steps.next_tag_version.outputs.new_version }}]"
-          if [ -n "${{ steps.next_tag_version.outputs.new_version }}" ]
+          echo "[${{ steps.moodle_version.outputs.tag }}] vs [${{ steps.next_tag_version.outputs.new_tag }}]"
+          if [ -n "${{ steps.next_tag_version.outputs.new_tag }}" ]
           then
             # Compare up to minor version
             PREFIX_MOODLE_TAG=`echo ${{ steps.moodle_version.outputs.tag }} | cut -d'.' -f1,2`
-            PREFIX_NEW_TAG=`echo ${{ steps.next_tag_version.outputs.new_version }} | cut -d'.' -f1,2`
+            PREFIX_NEW_TAG=`echo ${{ steps.next_tag_version.outputs.new_tag }} | cut -d'.' -f1,2`
             if [ "$PREFIX_MOODLE_TAG" = "$PREFIX_NEW_TAG" ];
             then
               # same Moodle minor version
-              echo "Use ${{ steps.next_tag_version.outputs.new_version }}"
-              echo "new_tag=${{ steps.next_tag_version.outputs.new_version }}" >> $GITHUB_OUTPUT
+              echo "Use ${{ steps.next_tag_version.outputs.new_tag }}"
+              echo "new_tag=${{ steps.next_tag_version.outputs.new_tag }}" >> $GITHUB_OUTPUT
             else
               # Moodle minor version changed
               echo "Use ${{ steps.moodle_version.outputs.tag }}"
@@ -83,7 +89,7 @@ jobs:
             fi
           else
             echo "No change is detected"
-            echo "new_tag=${{ steps.next_tag_version.outputs.previous_version }}" >> $GITHUB_OUTPUT
+            echo "new_tag=${{ steps.next_tag_version.outputs.previous_tag }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Generate release name
