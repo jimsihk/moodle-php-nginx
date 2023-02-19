@@ -1,8 +1,10 @@
 name: Nightly Build
 
 on:
-  schedule:
-    - cron: '00 20 * * *' #UTC
+#  schedule:
+#    - cron: '00 20 * * *' #UTC
+  push:
+    branches: ["fix/release-and-push"]
 
 permissions:
   contents: read
@@ -50,7 +52,6 @@ jobs:
     needs: [build-container]
     with:
       image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly
-      gitref: ${GITHUB_REF#refs/*/}
 
   tag-and-release:
     permissions:
@@ -59,3 +60,6 @@ jobs:
     needs: [build-container]
     with:
       image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly
+    secrets:
+      RELEASE_BOT_APP_ID: ${{ secrets.RELEASE_BOT_APP_ID }}
+      RELEASE_BOT_PRIVATE_KEY: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
