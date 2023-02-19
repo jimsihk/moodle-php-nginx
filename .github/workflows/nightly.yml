@@ -4,7 +4,7 @@ on:
 #  schedule:
 #    - cron: '00 20 * * *' #UTC
   push:
-    branches: ['fix/release-and-push']
+    branches: ["fix/release-and-push"]
 
 permissions:
   contents: read
