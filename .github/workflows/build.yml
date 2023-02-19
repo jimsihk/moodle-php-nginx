@@ -9,8 +9,6 @@ on:
       - LICENSE
       - .github/workflows/update-dockerhub-desc.yml
       - .github/workflows/test-pr.yml
-  release:
-    types: [released]
 
 env:
   IMAGE_REGISTRY: ${{ vars.REGISTRY_PUBLIC }}
@@ -104,10 +102,3 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prepare.outputs.tags }}
           platforms: ${{ steps.prepare.outputs.platforms }}
-
-      - name: Update Docker Hub Description
-        uses: peter-evans/dockerhub-description@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-          short-description: ${{ github.event.repository.description }}
