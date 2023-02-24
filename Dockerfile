@@ -1,5 +1,5 @@
 ARG ARCH=
-FROM ${ARCH}jimsihk/alpine-php-nginx:80.28.1
+FROM ${ARCH}jimsihk/alpine-php-nginx:80.28.2
 
 LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
       Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux."
@@ -8,8 +8,8 @@ LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
 ARG DCRON_VERSION="=4.5-r7"
 # renovate: datasource=repology depName=alpine_3_16/libcap versioning=loose
 ARG LIBCAP_VERSION="=2.64-r0"
-# renovate: datasource=repology depName=alpine_edge/git versioning=loose
-ARG GIT_VERSION="=2.39.2-r0"
+# renovate: datasource=repology depName=alpine_3_16/git versioning=loose
+ARG GIT_VERSION="=2.36.5-r0"
 # renovate: datasource=repology depName=alpine_3_16/bash versioning=loose
 ARG BASH_VERSION="=5.1.16-r2"
 
@@ -20,9 +20,7 @@ COPY --chown=nobody rootfs/ /
 
 # crond needs root, so install dcron and cap package and set the capabilities
 # on dcron binary https://github.com/inter169/systs/blob/master/alpine/crond/README.md
-RUN echo "https://dl-cdn.alpinelinux.org/alpine/edge/main/" >> /etc/apk/repositories \
-    && echo "https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
-    && apk add --no-cache \
+RUN apk add --no-cache \
         dcron${DCRON_VERSION} \
         libcap${LIBCAP_VERSION} \
         ${PHP_RUNTIME}-sodium${PHP_VERSION} \
