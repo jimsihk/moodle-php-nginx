@@ -45,7 +45,7 @@ The release tag will be in pattern: **XXX.YYY.ZZ**
 - **YYY** = Moodle Release Increments & Incremental Changes Number based on `version.php` of Moodle source
 - **ZZ** = Git Repo Releases
 
-e.g. for Moodle 4.1.1+ branch _401_ version 20221128*01.06*, the version number will be starting from 401.106.Z
+e.g. for Moodle 4.1.1+ branch _401_ version 20221128*01.06*, the release tag number will be starting from 401.106.0
 
 ## Usage
 
