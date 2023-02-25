@@ -6,7 +6,6 @@
 ![php 8.0](https://img.shields.io/badge/php-8.0-brightgreen.svg)
 ![moodle-4.1](https://img.shields.io/badge/moodle-4.1-yellow)
 ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
-[![Renovate](https://img.shields.io/badge/renovate-enabled-yellow.svg)](https://app.renovatebot.com/dashboard)
 
 Moodle setup for Docker, build on [Alpine Linux](http://www.alpinelinux.org/).
 
@@ -16,6 +15,8 @@ Repository: https://github.com/jimsihk/alpine-moodle
 * Built on the lightweight image https://github.com/jimsihk/alpine-php-nginx
 * Smaller Docker image size (+/-150MB)
 * Uses PHP 8.0 for better performance, lower cpu usage & memory footprint (Note: PHP 8.1 is not yet officially supported by Moodle, see [here](https://moodledev.io/general/development/policies/php#php-81))
+* Supports HA installation with multiple type of cache stores: memcached, Redis
+* Supports Redis Sentinel as cache stores via plugin https://github.com/catalyst/moodle-cachestore_redissentinel
 * Multi-arch support: 386, amd64, arm/v7, arm64, ppc64le, s390x
 * Optimized for 100 concurrent users
 * Optimized to only use resources when there's traffic (by using PHP-FPM's ondemand PM)
@@ -25,10 +26,26 @@ Repository: https://github.com/jimsihk/alpine-moodle
 * Configuration via ENV variables
 * Easily upgrade to newer Moodle versions (via `ARG_MOODLE_GIT_URL` and `ARG_MOODLE_GIT_BRANCH` at build time, `MOODLE_GIT_URL` and `MOODLE_GIT_BRANCH` at run time) with auto upgrade at docker start 
 * Moodle plug-in pre-installation at docker build time with argument `ARG_MOODLE_PLUGIN_LIST`
-* Supports multiple type of cache stores: memcached, Redis, Redis Sentinel (plugin from [catalyst](https://github.com/catalyst/moodle-cachestore_redissentinel))
 * The servers NGINX, PHP-FPM run under a non-privileged user (nobody) to make it more secure
 * The logs of all the services are redirected to the output of the Docker container (visible with `docker logs -f <container name>`)
 * Follows the KISS principle (Keep It Simple, Stupid) to make it easy to understand and adjust the image to your needs
+
+## Automated Release
+
+[![Renovate](https://img.shields.io/badge/renovate-enabled-yellow.svg)](https://app.renovatebot.com/dashboard)
+
+Moodle version and package dependencies are monitored and automatically updated through pull requests by Renovate: https://github.com/renovatebot/renovate
+
+[![Nightly Build](https://github.com/jimsihk/alpine-moodle/actions/workflows/nightly.yml/badge.svg)](https://github.com/jimsihk/alpine-moodle/actions/workflows/nightly.yml)
+
+A nightly build in GitHub Action scans for changes, then performs tagging and publishes a newer release on DockerHub: https://hub.docker.com/r/jimsihk/alpine-moodle
+
+The release tag will be in pattern: **XXX.YYY.ZZ**
+- **XXX** = Moodle Branch
+- **YYY** = Moodle Release Increments & Incremental Changes Number based on `version.php` of Moodle source
+- **ZZ** = Git Repo Releases
+
+e.g. for Moodle 4.1.1+ branch _401_ version 20221128*01.06*, the version number will be starting from 401.106.Z
 
 ## Usage
 
