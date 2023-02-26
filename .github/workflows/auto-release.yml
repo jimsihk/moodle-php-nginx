@@ -111,18 +111,22 @@ jobs:
           LAST_TAG=`git describe --tags $(git rev-list --tags --max-count=1)`
           LAST_TAG_COMMIT=`git rev-list -n 1 $LAST_TAG`
           echo "previous_tag=$LAST_TAG_COMMIT" >> $GITHUB_OUTPUT
+          echo "Last tag at $LAST_TAG with SHA $LAST_TAG_COMMIT"
 
       - name: Get changed container files
         id: changed-files
         uses: tj-actions/changed-files@v35.5.6
         with:
           base_sha: ${{ steps.get_commit_sha.outputs.previous_tag }}
-#          files: |
+          separator: "\n"
+          files: |
+            *
 #            rootfs/**
 #            Dockerfile
 
       - name: List changed files since last tag
         run: |
+          echo "Any files changed? ${{ steps.changed-files.outputs.any_changed }}"
           echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
 
       - name: Tag and create a GitHub release
