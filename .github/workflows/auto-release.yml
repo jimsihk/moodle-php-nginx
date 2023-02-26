@@ -106,7 +106,7 @@ jobs:
           echo "Release name: $R_NAME"
 
       - name: Get commit SHA of last tag
-        name: get_commit_sha
+        id: get_commit_sha
         run: |
           LAST_TAG_COMMIT=`git rev-list -n 1 ${{ steps.next_tag_version.outputs.previous_tag }}`
           echo "previous_tag=$LAST_TAG_COMMIT" >> $GITHUB_OUTPUT
