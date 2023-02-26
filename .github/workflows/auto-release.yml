@@ -122,7 +122,7 @@ jobs:
 
       - name: List changed files since last tag
         run: |
-          echo "List all the files that have changed: ${{ steps.changed-files.outputs.all_changed_files }}"
+          echo "Changed files: ${{ steps.changed-files.outputs.all_changed_files }}"
 
       - name: Tag and create a GitHub release
         if: steps.changed-files.outputs.any_changed == 'true'
