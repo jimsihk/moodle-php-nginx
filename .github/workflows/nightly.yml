@@ -3,8 +3,6 @@ name: Nightly Build
 on:
   schedule:
     - cron: '00 20 * * *' #UTC
-  push:
-    branches: ["feature/fine-tune-auto-release"]
 
 permissions:
   contents: read
