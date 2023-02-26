@@ -116,10 +116,10 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v35.5.6
         with:
-          base-sha: ${{ steps.get_commit_sha.outputs.previous_tag }}
-          files: |
-            rootfs/**
-            Dockerfile
+          base_sha: ${{ steps.get_commit_sha.outputs.previous_tag }}
+#          files: |
+#            rootfs/**
+#            Dockerfile
 
       - name: List changed files since last tag
         run: |
