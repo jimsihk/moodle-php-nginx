@@ -105,7 +105,27 @@ jobs:
           echo "release_name=$R_NAME" >> $GITHUB_OUTPUT
           echo "Release name: $R_NAME"
 
+      - name: Get commit SHA of last tag
+        name: get_commit_sha
+        run: |
+          LAST_TAG_COMMIT=`git rev-list -n 1 ${{ steps.next_tag_version.outputs.previous_tag }}`
+          echo "previous_tag=$LAST_TAG_COMMIT" >> $GITHUB_OUTPUT
+
+      - name: Get changed container files
+        id: changed-files
+        uses: tj-actions/changed-files@v35.5.6
+        with:
+          base-sha: ${{ steps.get_commit_sha.outputs.previous_tag }}
+          files: |
+            rootfs/**
+            Dockerfile
+
+      - name: List changed files since last tag
+        run: |
+          echo "List all the files that have changed: ${{ steps.changed-files.outputs.all_changed_files }}"
+
       - name: Tag and create a GitHub release
+        if: steps.changed-files.outputs.any_changed == 'true'
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.get_changes.outputs.new_tag }}
