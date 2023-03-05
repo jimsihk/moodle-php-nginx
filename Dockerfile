@@ -1,5 +1,5 @@
 ARG ARCH=
-FROM ${ARCH}jimsihk/alpine-php-nginx:80.28.2
+FROM ${ARCH}jimsihk/alpine-php-nginx:80.28.3
 
 LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
       Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux."
@@ -23,8 +23,6 @@ COPY --chown=nobody rootfs/ /
 RUN apk add --no-cache \
         dcron${DCRON_VERSION} \
         libcap${LIBCAP_VERSION} \
-        ${PHP_RUNTIME}-sodium${PHP_VERSION} \
-        ${PHP_RUNTIME}-exif${PHP_VERSION} \
         git${GIT_VERSION} \
         readline${READLINE_VERSION} \
         bash${BASH_VERSION} \
