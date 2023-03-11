@@ -1,17 +1,17 @@
 ARG ARCH=
-FROM ${ARCH}jimsihk/alpine-php-nginx:80.28.3
+FROM ${ARCH}jimsihk/alpine-php-nginx:81.16.0
 
 LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
       Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux."
 
-# renovate: datasource=repology depName=alpine_3_16/dcron versioning=loose
-ARG DCRON_VERSION="=4.5-r7"
-# renovate: datasource=repology depName=alpine_3_16/libcap versioning=loose
-ARG LIBCAP_VERSION="=2.64-r0"
-# renovate: datasource=repology depName=alpine_3_16/git versioning=loose
-ARG GIT_VERSION="=2.36.5-r0"
+# renovate: datasource=repology depName=alpine_3_17/dcron versioning=loose
+ARG DCRON_VERSION="=4.5-r8"
+# renovate: datasource=repology depName=alpine_3_17/libcap versioning=loose
+ARG LIBCAP_VERSION="=2.66-r0"
+# renovate: datasource=repology depName=alpine_3_17/git versioning=loose
+ARG GIT_VERSION="=2.38.4-r1"
 # renovate: datasource=repology depName=alpine_3_16/bash versioning=loose
-ARG BASH_VERSION="=5.1.16-r2"
+ARG BASH_VERSION="=5.2.15-r0"
 
 ARG WEB_PATH='/var/www/html'
 
@@ -24,7 +24,6 @@ RUN apk add --no-cache \
         dcron${DCRON_VERSION} \
         libcap${LIBCAP_VERSION} \
         git${GIT_VERSION} \
-        readline${READLINE_VERSION} \
         bash${BASH_VERSION} \
     && chown nobody:nobody /usr/sbin/crond \
     && setcap cap_setgid=ep /usr/sbin/crond \
