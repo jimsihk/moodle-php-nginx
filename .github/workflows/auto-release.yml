@@ -39,7 +39,7 @@ jobs:
           WITH_V: false
           DRY_RUN: true
           DEFAULT_BUMP: patch
-          RELEASE_BRANCHES: ${{ vars.RELEASE_BRANCHES }}
+          RELEASE_BRANCHES: php8.0
 
       - name: Set next version
         id: next_tag_version
