@@ -40,6 +40,7 @@ jobs:
           DRY_RUN: true
           DEFAULT_BUMP: patch
           RELEASE_BRANCHES: php8.0
+          TAG_CONTEXT: branch
 
       - name: Set next version
         id: next_tag_version
@@ -136,10 +137,11 @@ jobs:
         if: steps.changed-files.outputs.any_changed == 'true'
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.get_changes.outputs.new_tag }}
+          tag: ${{ steps.get_changes.outputs.new_tag }}-php8
           commit: ${{ github.sha }}
-          name: ${{ steps.release_detail.outputs.release_name }}
+          name: ${{ steps.release_detail.outputs.release_name }} (PHP8)
           skipIfReleaseExists: true
           allowUpdates: false
           generateReleaseNotes: true
           token: ${{ steps.generate_release_token.outputs.token }}
+          makeLatest: false

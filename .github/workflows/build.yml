@@ -30,14 +30,10 @@ jobs:
           DOCKER_PLATFORMS=${{ vars.CONTAINER_ARCH }}
 
           VERSION=${GITHUB_REF#refs/*/}
-          TAGS="${{ env.IMAGE_NAME }}:${VERSION}-php8"
+          TAGS="${{ env.IMAGE_NAME }}:${VERSION}"
 
           if [[ $GITHUB_REF == refs/tags/* ]]; then
-            TAGS="$TAGS,${{ env.IMAGE_NAME }}:php8"
-          fi
-
-          if [[ $VERSION == "php8" ]]; then
-            TAGS="$TAGS,${{ env.IMAGE_NAME }}:${VERSION}-${SHORT_SHA}"
+            TAGS="$TAGS,${{ env.IMAGE_NAME }}:php8.0"
           fi
 
           echo "platforms=${DOCKER_PLATFORMS}" >> $GITHUB_OUTPUT
