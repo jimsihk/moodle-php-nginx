@@ -11,7 +11,7 @@ env:
   IMAGE_REGISTRY: ${{ vars.REGISTRY_NIGHTLY }}
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
-  IMAGE_TAG: nightly
+  IMAGE_TAG: nightly-php8
 
 jobs:
   build-container:
@@ -49,7 +49,7 @@ jobs:
     uses: ./.github/workflows/scan.yml
     needs: [build-container]
     with:
-      image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly
+      image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly-php8
 
   tag-and-release:
     permissions:
@@ -57,7 +57,7 @@ jobs:
     uses: ./.github/workflows/auto-release.yml
     needs: [build-container]
     with:
-      image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly
+      image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly-php8
     secrets:
       RELEASE_BOT_APP_ID: ${{ secrets.RELEASE_BOT_APP_ID }}
       RELEASE_BOT_PRIVATE_KEY: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}

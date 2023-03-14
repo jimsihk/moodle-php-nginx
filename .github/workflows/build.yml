@@ -3,7 +3,7 @@ name: Build and push docker image
 on:
   push:
     tags: ['*']
-    branches: ["dev"]
+    branches: ["php8.0"]
     paths-ignore:
       - README.md
       - .github/workflows/update-dockerhub-desc.yml
@@ -30,13 +30,13 @@ jobs:
           DOCKER_PLATFORMS=${{ vars.CONTAINER_ARCH }}
 
           VERSION=${GITHUB_REF#refs/*/}
-          TAGS="${{ env.IMAGE_NAME }}:${VERSION}"
+          TAGS="${{ env.IMAGE_NAME }}:${VERSION}-php8"
 
           if [[ $GITHUB_REF == refs/tags/* ]]; then
-            TAGS="$TAGS,${{ env.IMAGE_NAME }}:latest"
+            TAGS="$TAGS,${{ env.IMAGE_NAME }}:php8"
           fi
 
-          if [[ $VERSION == "dev" ]]; then
+          if [[ $VERSION == "php8" ]]; then
             TAGS="$TAGS,${{ env.IMAGE_NAME }}:${VERSION}-${SHORT_SHA}"
           fi
 
