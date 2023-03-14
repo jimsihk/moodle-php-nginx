@@ -3,6 +3,7 @@
   "extends": [
     "config:base"
   ],
+  "additionalBranchPrefix": "php",
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch", "digest"],
