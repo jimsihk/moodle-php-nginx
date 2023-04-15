@@ -1,5 +1,5 @@
 ARG ARCH=
-FROM ${ARCH}jimsihk/alpine-php-nginx:81.17.2
+FROM ${ARCH}jimsihk/alpine-php-nginx:81.18.0
 
 LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
       Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux."
