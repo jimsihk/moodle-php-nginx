@@ -11,7 +11,8 @@ on:
 
 env:
   IMAGE_REGISTRY: ${{ vars.REGISTRY_PUBLIC }}
-  IMAGE_NAME: ${{ github.repository }} #<account>/<repo>
+  #<account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
   TEST_TAG: test-build
 
 jobs:
