@@ -2,7 +2,8 @@ name: Update DockerHub Description
 
 on:
   push:
-    branches: ["dev"]
+#    branches: ["dev"]
+    branches: ["feature/upgrade-moodle-4.2"]
     paths:
       - README.md
       - .github/workflows/update-dockerhub-desc.yml
