@@ -4,7 +4,7 @@
 ![Docker Image Size](https://img.shields.io/docker/image-size/jimsihk/alpine-moodle)
 ![nginx 1.22](https://img.shields.io/badge/nginx-1.22-brightgreen.svg)
 ![php 8.1](https://img.shields.io/badge/php-8.1-brightgreen.svg)
-![moodle-4.1](https://img.shields.io/badge/moodle-4.1-yellow)
+![moodle-4.2](https://img.shields.io/badge/moodle-4.2-yellow)
 ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 
 Moodle setup with high availability (HA) capabilities for Docker, build on [Alpine Linux](http://www.alpinelinux.org/).
@@ -39,7 +39,7 @@ Moodle version and package dependencies are monitored and automatically updated 
 
 [![Nightly Build](https://github.com/jimsihk/alpine-moodle/actions/workflows/nightly.yml/badge.svg)](https://github.com/jimsihk/alpine-moodle/actions/workflows/nightly.yml)
 
-A nightly build in GitHub Action scans for changes, then performs tagging and publishes a newer release on DockerHub: https://hub.docker.com/r/jimsihk/alpine-moodle
+A nightly build in GitHub Action scans for changes, then performs tagging and publishes a newer release on container registries.
 
 The release tag will be in pattern: **XXX.YYY.ZZ**
 - **XXX** = Moodle Branch
@@ -47,6 +47,11 @@ The release tag will be in pattern: **XXX.YYY.ZZ**
 - **ZZ** = Git Repo Releases
 
 e.g. for Moodle 4.1.1+ branch _401_ version 20221128*01.06*, the release tag number will be starting from 401.106.0
+
+## Multiple Container Registry
+The images are available on multiple registries:
+- DockerHub: https://hub.docker.com/r/jimsihk/alpine-moodle
+- Quay.io: https://quay.io/repository/jimsihk/alpine-moodle
 
 ## Usage
 
@@ -59,50 +64,51 @@ Login on the system using the provided credentials (ENV vars)
 ## Configuration
 Define the ENV variables in docker-compose.yml file
 
-| Variable Name               | Default              | Description                                                                                                          |
-|-----------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------|
-| LANG                        | en_US.UTF-8          |                                                                                                                      |
-| LANGUAGE                    | en_US:en             |                                                                                                                      |
-| SITE_URL                    | http://localhost     | Sets the public site URL                                                                                             |
-| SSLPROXY                    | false                | Disable SSL proxy to avoid site loop. e.g. Cloudflare                                                                |
-| DB_TYPE                     | pgsql                | mysqli - pgsql - mariadb                                                                                             |
-| DB_HOST                     | postgres             | Database hostname e.g. database container name                                                                             |
-| DB_PORT                     | 5432                 | PostgresSQL=5432 - MySQL/MariaDB=3306                                                                                |
-| DB_NAME                     | moodle               | Database name                                                                                                        |
-| DB_USER                     | moodle               | Database login username                                                                                              |
-| DB_PASS                     | moodle               | Database login password                                                                                              |
-| DB_FETCHBUFFERSIZE          |                      | Set to 0 if using PostgresSQL poolers like PgBouncer in 'transaction' mode                                           |
-| DB_DBHANDLEOPTIONS          | false                | Set to true if using PostgresSQL poolers like PgBouncer which does not support sending options                       |
-| DB_HOST_REPLICA             |                      | Database hostname of the read-only replica database                                                                  |
-| DB_PORT_REPLICA             |                      | Database port of replica, left it empty to be same as DB_PORT                                                        |
-| DB_USER_REPLICA             |                      | Database login username of replica, left it empty to be same as DB_USER                                              |
-| DB_PASS_REPLICA             |                      | Database login password of replica, left it empty to be same as DB_PASS                                              |
-| DB_PREFIX                   | mdl_                 | Database prefix. **WARNING**: don't use numeric values or Moodle won't start                                         |
-| MOODLE_EMAIL                | user@example.com     |                                                                                                                      |
-| MOODLE_LANGUAGE             | en                   |                                                                                                                      |
-| MOODLE_SITENAME             | New-Site             |                                                                                                                      |
-| MOODLE_SHORTNAME            | moodle               |                                                                                                                      |
-| MOODLE_USERNAME             | moodleuser           |                                                                                                                      |
-| MOODLE_PASSWORD             | PLEASE_CHANGEME      |                                                                                                                      |
-| SMTP_HOST                   | smtp.gmail.com       |                                                                                                                      |
-| SMTP_PORT                   | 587                  |                                                                                                                      |
-| SMTP_USER                   | your_email@gmail.com |                                                                                                                      |
-| SMTP_PASSWORD               | your_password        |                                                                                                                      |
-| SMTP_PROTOCOL               | tls                  |                                                                                                                      |
-| MOODLE_MAIL_NOREPLY_ADDRESS | noreply@localhost    |                                                                                                                      |
-| MOODLE_MAIL_PREFIX          | [moodle]             |                                                                                                                      |
-| client_max_body_size        | 50M                  |                                                                                                                      |
-| post_max_size               | 50M                  |                                                                                                                      |
-| upload_max_filesize         | 50M                  |                                                                                                                      |
-| max_input_vars              | 5000                 |                                                                                                                      |
-| SESSION_CACHE_TYPE          |                      | Optionally sets shared session cache store: memcached, redis, database _(leave it blank to keep unchanged)_          |
-| SESSION_CACHE_HOST          |                      | Hostname of the external cache store, required for memcached and redis                                               |
-| SESSION_CACHE_PORT          |                      | Memcached=11211, Redis=6379, required for memcached and redis                                                        |
-| SESSION_CACHE_PREFIX        | mdl                  | Cache prefix                                                                                                         |
-| SESSION_CACHE_AUTH          |                      | Authentication key for cache store, may be required for redis                                                        |
-| AUTO_UPDATE_MOODLE          | true                 | Set to false to disable performing update of Moodle (e.g. plugins) at docker start                                   |
-| UPDATE_MOODLE_CODE          | true                 | Set to false to disable auto download latest patch of Moodle core code, only effective if AUTO_UPDATE_MOODLE is true |
-| DISABLE_WEB_INSTALL_PLUGIN  | false                | Set to true to disable plugin installation via site admin UI, could be useful to avoid image outsync with HA setting |
+| Variable Name               | Default              | Description                                                                                                                                  |
+|-----------------------------|----------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| LANG                        | en_US.UTF-8          |                                                                                                                                              |
+| LANGUAGE                    | en_US:en             |                                                                                                                                              |
+| SITE_URL                    | http://localhost     | Sets the public site URL                                                                                                                     |
+| SSLPROXY                    | false                | Disable SSL proxy to avoid site loop. e.g. Cloudflare                                                                                        |
+| DB_TYPE                     | pgsql                | mysqli - pgsql - mariadb                                                                                                                     |
+| DB_HOST                     | postgres             | Database hostname e.g. database container name                                                                                               |
+| DB_PORT                     | 5432                 | PostgresSQL=5432 - MySQL/MariaDB=3306                                                                                                        |
+| DB_NAME                     | moodle               | Database name                                                                                                                                |
+| DB_USER                     | moodle               | Database login username                                                                                                                      |
+| DB_PASS                     | moodle               | Database login password                                                                                                                      |
+| DB_FETCHBUFFERSIZE          |                      | Set to 0 if using PostgresSQL poolers like PgBouncer in 'transaction' mode                                                                   |
+| DB_DBHANDLEOPTIONS          | false                | Set to true if using PostgresSQL poolers like PgBouncer which does not support sending options                                               |
+| DB_HOST_REPLICA             |                      | Database hostname of the read-only replica database                                                                                          |
+| DB_PORT_REPLICA             |                      | Database port of replica, left it empty to be same as DB_PORT                                                                                |
+| DB_USER_REPLICA             |                      | Database login username of replica, left it empty to be same as DB_USER                                                                      |
+| DB_PASS_REPLICA             |                      | Database login password of replica, left it empty to be same as DB_PASS                                                                      |
+| DB_PREFIX                   | mdl_                 | Database prefix. **WARNING**: don't use numeric values or Moodle won't start                                                                 |
+| MOODLE_EMAIL                | user@example.com     |                                                                                                                                              |
+| MOODLE_LANGUAGE             | en                   |                                                                                                                                              |
+| MOODLE_SITENAME             | New-Site             |                                                                                                                                              |
+| MOODLE_SHORTNAME            | moodle               |                                                                                                                                              |
+| MOODLE_USERNAME             | moodleuser           |                                                                                                                                              |
+| MOODLE_PASSWORD             | PLEASE_CHANGEME      |                                                                                                                                              |
+| SMTP_HOST                   | smtp.gmail.com       |                                                                                                                                              |
+| SMTP_PORT                   | 587                  |                                                                                                                                              |
+| SMTP_USER                   | your_email@gmail.com |                                                                                                                                              |
+| SMTP_PASSWORD               | your_password        |                                                                                                                                              |
+| SMTP_PROTOCOL               | tls                  |                                                                                                                                              |
+| MOODLE_MAIL_NOREPLY_ADDRESS | noreply@localhost    |                                                                                                                                              |
+| MOODLE_MAIL_PREFIX          | [moodle]             |                                                                                                                                              |
+| client_max_body_size        | 50M                  |                                                                                                                                              |
+| post_max_size               | 50M                  |                                                                                                                                              |
+| upload_max_filesize         | 50M                  |                                                                                                                                              |
+| max_input_vars              | 5000                 |                                                                                                                                              |
+| SESSION_CACHE_TYPE          |                      | Optionally sets shared session cache store: memcached, redis, database _(leave it blank to keep unchanged)_                                  |
+| SESSION_CACHE_HOST          |                      | Hostname of the external cache store, required for memcached and redis                                                                       |
+| SESSION_CACHE_PORT          |                      | Memcached=11211, Redis=6379, required for memcached and redis                                                                                |
+| SESSION_CACHE_PREFIX        | mdl                  | Cache prefix                                                                                                                                 |
+| SESSION_CACHE_AUTH          |                      | Authentication key for cache store, may be required for redis                                                                                |
+| AUTO_UPDATE_MOODLE          | true                 | Set to false to disable performing update of Moodle (e.g. plugins) at docker start                                                           |
+| UPDATE_MOODLE_CODE          | true                 | Set to false to disable auto download latest patch of Moodle core code, only effective if AUTO_UPDATE_MOODLE is true                         |
+| DISABLE_WEB_INSTALL_PLUGIN  | false                | Set to true to disable plugin installation via site admin UI, could be useful to avoid image outsync with HA setting                         |
+| MAINT_STATUS_KEYWORD        | Status: enabled      | Keyword for detecting Moodle maintainence status when running admin/cli/maintenance.php, language following the Moodle site default language |
 
 ### Important Note about using `AUTO_UPDATE_MOODLE` and `UPDATE_MOODLE_CODE`
 

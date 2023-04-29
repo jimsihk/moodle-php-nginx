@@ -34,9 +34,9 @@ USER nobody
 
 # Change MOODLE_XX_STABLE for new versions
 ARG ARG_MOODLE_GIT_URL='https://github.com/moodle/moodle.git'
-ARG ARG_MODOLE_GIT_BRANCH='MOODLE_401_STABLE'
-# renovate: datasource=git-refs depName=https://github.com/moodle/moodle branch=MOODLE_401_STABLE
-ARG ARG_MODOLE_GIT_COMMIT='4901ffe1ba570e14a46501050d7e4f36cdb9b78d'
+ARG ARG_MODOLE_GIT_BRANCH='MOODLE_402_STABLE'
+# renovate: datasource=git-refs depName=https://github.com/moodle/moodle branch=MOODLE_402_STABLE
+ARG ARG_MODOLE_GIT_COMMIT='4f625c1e2e50f33332132b3847990c81cfe7ed8b'
 ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     MODOLE_GIT_BRANCH=${ARG_MODOLE_GIT_BRANCH} \
     MOODLE_GIT_COMMIT=${ARG_MODOLE_GIT_COMMIT} \
@@ -72,7 +72,8 @@ ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     SESSION_CACHE_PREFIX=mdl \
     AUTO_UPDATE_MOODLE=true \
     UPGRADE_MOODLE_CODE=true \
-    DISABLE_WEB_INSTALL_PLUGIN=false
+    DISABLE_WEB_INSTALL_PLUGIN=false \
+    MAINT_STATUS_KEYWORD='Status: enabled'
 
 # Install from Git for easier upgrade in the future
 # - Using temporary storage to store the Git repo and copy back to working directory 
@@ -95,6 +96,15 @@ ARG REDISSENTINEL_PLUGIN_GIT_BRANCH='master'
 ARG REDISSENTINEL_PLUGIN_GIT_COMMIT='b495e8f36a81fd1a2a414e34a978da879c473f31'
 RUN git clone "${REDISSENTINEL_PLUGIN_GIT_URL}" --branch "${REDISSENTINEL_PLUGIN_GIT_BRANCH}" --depth 1 ${WEB_PATH}/cache/stores/redissentinel/
 RUN /usr/libexec/check-git-commit "${WEB_PATH}/cache/stores/redissentinel/" "${REDISSENTINEL_PLUGIN_GIT_COMMIT}"
+
+# Install plugin for memcached as cache store since Moodle remove it from core since 4.2
+# Reference: https://tracker.moodle.org/browse/MDL-77161
+ARG MEMCACHED_PLUGIN_GIT_URL='https://github.com/moodlehq/moodle-cachestore_memcached'
+ARG MEMCACHED_PLUGIN_GIT_BRANCH='master'
+# renovate: datasource=git-refs depName=https://github.com/moodlehq/moodle-cachestore_memcached branch=master
+ARG MEMCACHED_PLUGIN_GIT_COMMIT='db68d31ab5856cb55210478fdd452dc0cd6c6d05'
+RUN git clone "${MEMCACHED_PLUGIN_GIT_URL}" --branch "${MEMCACHED_PLUGIN_GIT_BRANCH}" --depth 1 ${WEB_PATH}/cache/stores/memcached/
+RUN /usr/libexec/check-git-commit "${WEB_PATH}/cache/stores/memcached/" "${MEMCACHED_PLUGIN_GIT_COMMIT}"
 
 # Install additional plugins (a space/comma separated arguement), if any
 # Reference: https://github.com/krestomatio/container_builder/tree/master/moodle#moodle-plugins
