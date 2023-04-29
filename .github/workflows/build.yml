@@ -34,7 +34,7 @@ jobs:
             TAGS="$TAGS,${{ env.IMAGE_NAME }}:latest"
           fi
           
-          for TAG in ${echo $TAGS | sed 's/,/ /g'}; do
+          for TAG in $(echo $TAGS | sed 's/,/ /g'); do
             TAGS="$TAGS,quay.io/$TAG"
           done
 
