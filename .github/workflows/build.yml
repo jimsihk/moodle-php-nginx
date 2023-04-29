@@ -104,7 +104,7 @@ jobs:
           files: |
             rootfs/**
             Dockerfile
- 
+
       - name: List changed container files
         run: |
           echo "Any container files changed? ${{ steps.changed-files.outputs.any_changed }}"
