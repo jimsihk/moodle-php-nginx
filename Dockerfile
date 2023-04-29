@@ -34,9 +34,9 @@ USER nobody
 
 # Change MOODLE_XX_STABLE for new versions
 ARG ARG_MOODLE_GIT_URL='https://github.com/moodle/moodle.git'
-ARG ARG_MODOLE_GIT_BRANCH='MOODLE_401_STABLE'
-# renovate: datasource=git-refs depName=https://github.com/moodle/moodle branch=MOODLE_401_STABLE
-ARG ARG_MODOLE_GIT_COMMIT='4901ffe1ba570e14a46501050d7e4f36cdb9b78d'
+ARG ARG_MODOLE_GIT_BRANCH='MOODLE_402_STABLE'
+# renovate: datasource=git-refs depName=https://github.com/moodle/moodle branch=MOODLE_402_STABLE
+ARG ARG_MODOLE_GIT_COMMIT='4f625c1e2e50f33332132b3847990c81cfe7ed8b'
 ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     MODOLE_GIT_BRANCH=${ARG_MODOLE_GIT_BRANCH} \
     MOODLE_GIT_COMMIT=${ARG_MODOLE_GIT_COMMIT} \
@@ -72,33 +72,51 @@ ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     SESSION_CACHE_PREFIX=mdl \
     AUTO_UPDATE_MOODLE=true \
     UPGRADE_MOODLE_CODE=true \
-    DISABLE_WEB_INSTALL_PLUGIN=false
+    DISABLE_WEB_INSTALL_PLUGIN=false \
+    MAINT_STATUS_KEYWORD='Status: enabled'
+
+ARG TEMP_MOODLE_PATH='/tmp/moodle'
+
+ARG REDISSENTINEL_PLUGIN_GIT_URL='https://github.com/catalyst/moodle-cachestore_redissentinel.git'
+ARG REDISSENTINEL_PLUGIN_GIT_BRANCH='master'
+# renovate: datasource=git-refs depName=https://github.com/catalyst/moodle-cachestore_redissentinel branch=master
+ARG REDISSENTINEL_PLUGIN_GIT_COMMIT='b495e8f36a81fd1a2a414e34a978da879c473f31'
+
+ARG MEMCACHED_PLUGIN_GIT_URL='https://github.com/moodlehq/moodle-cachestore_memcached'
+ARG MEMCACHED_PLUGIN_GIT_BRANCH='master'
+# renovate: datasource=git-refs depName=https://github.com/moodlehq/moodle-cachestore_memcached branch=master
+ARG MEMCACHED_PLUGIN_GIT_COMMIT='db68d31ab5856cb55210478fdd452dc0cd6c6d05'
+
+ARG ARG_MOODLE_PLUGIN_LIST=""
+ENV MOODLE_PLUGIN_LIST=${ARG_MOODLE_PLUGIN_LIST}
 
 # Install from Git for easier upgrade in the future
 # - Using temporary storage to store the Git repo and copy back to working directory 
 #   to avoid deteched head and failure due to files exist in the directory
 # - Git depth is set to 1 and and single branch to reduce docker size while keeping
 #   the functionality of git pull from source
-ARG TEMP_MOODLE_PATH='/tmp/moodle'
 RUN if [ -d /tmp/moodle ]; then rm -rf /tmp/moodle; fi \
     && git clone "${MOODLE_GIT_URL}" --branch "${MODOLE_GIT_BRANCH}" --single-branch --depth 1 ${TEMP_MOODLE_PATH}/ \
     && if [ -f ${TEMP_MOODLE_PATH}/Gruntfile.js ]; then rm ${TEMP_MOODLE_PATH}/Gruntfile.js; fi \
     && if [ -f ${TEMP_MOODLE_PATH}/config-dist.php ]; then rm ${TEMP_MOODLE_PATH}/config-dist.php; fi \
     && cp -paR ${TEMP_MOODLE_PATH}/. ${WEB_PATH}/ \
-    && rm -rf ${TEMP_MOODLE_PATH}
-RUN /usr/libexec/moodle/check-moodle-version "${MOODLE_GIT_COMMIT}"
-
-# Install plugin for Redis Sentinel as cache store
-ARG REDISSENTINEL_PLUGIN_GIT_URL='https://github.com/catalyst/moodle-cachestore_redissentinel.git'
-ARG REDISSENTINEL_PLUGIN_GIT_BRANCH='master'
-# renovate: datasource=git-refs depName=https://github.com/catalyst/moodle-cachestore_redissentinel branch=master
-ARG REDISSENTINEL_PLUGIN_GIT_COMMIT='b495e8f36a81fd1a2a414e34a978da879c473f31'
-RUN git clone "${REDISSENTINEL_PLUGIN_GIT_URL}" --branch "${REDISSENTINEL_PLUGIN_GIT_BRANCH}" --depth 1 ${WEB_PATH}/cache/stores/redissentinel/
-RUN /usr/libexec/check-git-commit "${WEB_PATH}/cache/stores/redissentinel/" "${REDISSENTINEL_PLUGIN_GIT_COMMIT}"
-
-# Install additional plugins (a space/comma separated arguement), if any
+    && rm -rf ${TEMP_MOODLE_PATH} \
+    && /usr/libexec/moodle/check-moodle-version "${MOODLE_GIT_COMMIT}" \
+# Install plugin for Redis Sentinel cache store \
+# Reference: https://github.com/catalyst/moodle-cachestore_redissentinel \
+    && /usr/libexec/moodle/install-git-plugin \
+          "${REDISSENTINEL_PLUGIN_GIT_URL}"  \
+          "${REDISSENTINEL_PLUGIN_GIT_BRANCH}" \
+          "${REDISSENTINEL_PLUGIN_GIT_COMMIT}" \
+          "${WEB_PATH}/cache/stores/redissentinel/" \
+# Install plugin for memcached cache store which was removed from Moodle core since 4.2
+# Reference: https://tracker.moodle.org/browse/MDL-77161 \
+    && /usr/libexec/moodle/install-git-plugin \
+          "${MEMCACHED_PLUGIN_GIT_URL}" \
+          "${MEMCACHED_PLUGIN_GIT_BRANCH}" \
+          "${MEMCACHED_PLUGIN_GIT_COMMIT}" \
+          "${WEB_PATH}/cache/stores/memcached/" \
+# Install additional plugins (a space/comma separated argument), if any
 # Reference: https://github.com/krestomatio/container_builder/tree/master/moodle#moodle-plugins
-ARG ARG_MOODLE_PLUGIN_LIST=""
-ENV MOODLE_PLUGIN_LIST=${ARG_MOODLE_PLUGIN_LIST}
-RUN if [ -n "${MOODLE_PLUGIN_LIST}" ]; then /usr/libexec/moodle/install-plugin-list -p "${MOODLE_PLUGIN_LIST}"; fi \
+    && if [ -n "${MOODLE_PLUGIN_LIST}" ]; then /usr/libexec/moodle/install-plugin-list -p "${MOODLE_PLUGIN_LIST}"; fi \
     && rm -rf /tmp/moodle-plugins

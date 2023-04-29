@@ -214,7 +214,7 @@ if [ -z "$AUTO_UPDATE_MOODLE" ] || [ "$AUTO_UPDATE_MOODLE" = true ]; then
   echo "Checking maintenance status..."
   START_IN_MAINT_MODE=false
   MAINT_STATUS=$(php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php | sed 's/^==.*==//g' | sed '/^$/d')
-  if [ "$MAINT_STATUS" = 'Status: enabled' ]; then
+  if [ "$MAINT_STATUS" = "$MAINT_STATUS_KEYWORD" ]; then
       echo "Maintenance mode will be kept enabled"
       START_IN_MAINT_MODE=true
   fi
