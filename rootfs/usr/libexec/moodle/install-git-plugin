@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Install Moodle plugin from Git
+# Description: The script will take the inputted Git repo to install 
+#              to Moodle core
+# Parameters: $1: Git repo URL, e.g. https://github.com/catalyst/moodle-cachestore_redissentinel.gi
+#             $2: Git branch, e.g. master
+#             $3: Git commit hash, e.g. b495e8f36a81fd1a2a414e34a978da879c473f31
+#             $4: Moodle plugin absolute path, e.g. /var/www/html/cache/stores/redissentinel/
+#
+
+if [ -n "$1" ] && [ -n "$2" ] && [ -n "$3" ] && [ -n "$4" ]
+then
+  PLUGIN_GIT_URL="$1"
+  PLUGIN_GIT_BRANCH="$2"
+  PLUGIN_GIT_COMMIT="$3"
+  PLUGIN_PATH="$4"
+  git clone "${PLUGIN_GIT_URL}" --branch "${PLUGIN_GIT_BRANCH}" --depth 1 "${PLUGIN_PATH}"
+  /usr/libexec/check-git-commit "${PLUGIN_PATH}" "${PLUGIN_GIT_COMMIT}"
+else
+  echo "Missing argument: <repo> <branch> <commit_hash> <local_path>"
+  exit 1
+fi
