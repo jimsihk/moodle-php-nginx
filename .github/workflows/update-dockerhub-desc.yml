@@ -2,8 +2,7 @@ name: Update DockerHub Description
 
 on:
   push:
-#    branches: ["dev"]
-    branches: ["feature/upgrade-moodle-4.2"]
+    branches: ["dev"]
     paths:
       - README.md
       - .github/workflows/update-dockerhub-desc.yml
@@ -15,27 +14,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-#      - name: Update Docker Hub Description
-#        uses: christian-korneck/update-container-description-action@v1
-#        env:
-#          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
-#          DOCKER_PASS: ${{ secrets.DOCKERHUB_TOKEN }}
-#        with:
-#          destination_container_repo: ${{ github.repository }}
-#          provider: dockerhub
-#          short-description: ${{ github.event.repository.description }}
-          
-      - name: Login to Quay.io
-        uses: docker/login-action@v2
+      - name: Update Docker Hub Description
+        uses: peter-evans/dockerhub-description@v3
         with:
-          registry: quay.io
-          username: ${{ secrets.QUAYIO_USERNAME }}
-          password: ${{ secrets.QUAYIO_TOKEN }}
-
-      - name: Update Quay.io Description
-        uses: christian-korneck/update-container-description-action@v1
-        env:
-          DOCKER_APIKEY: ${{ secrets.QUAYIO_TOKEN }}
-        with:
-          destination_container_repo: quay.io/${{ github.repository }}
-          provider: quay
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          short-description: ${{ github.event.repository.description }}
