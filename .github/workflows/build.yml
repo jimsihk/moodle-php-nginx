@@ -2,9 +2,8 @@ name: Build and push docker image
 
 on:
   push:
-#    tags: ['*']
-#    branches: ["dev"]
-    branches: ["feature/upgrade-moodle-4.2"]
+    tags: ['*']
+    branches: ["dev"]
     paths-ignore:
       - README.md
       - .github/workflows/update-dockerhub-desc.yml
@@ -27,7 +26,7 @@ jobs:
         run: |
           DOCKER_PLATFORMS=${{ vars.CONTAINER_ARCH }}
 
-          VERSION="beta"
+          VERSION=${GITHUB_REF#refs/*/}
           TAGS="${{ env.IMAGE_NAME }}:${VERSION}"
 
           if [[ $GITHUB_REF == refs/tags/* ]]; then
