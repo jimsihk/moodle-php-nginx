@@ -2,8 +2,7 @@ name: Update DockerHub Description
 
 on:
   push:
-#    branches: ["dev"]
-    branches: ["feature/upgrade-moodle-4.2"]
+    branches: ["dev"]
     paths:
       - README.md
       - .github/workflows/update-dockerhub-desc.yml
@@ -30,5 +29,5 @@ jobs:
         env:
           DOCKER_APIKEY: ${{ secrets.QUAYIO_TOKEN }}
         with:
-          destination_container_repo: ${{ github.repository }}
+          destination_container_repo: quay.io/${{ github.repository }}
           provider: quay
