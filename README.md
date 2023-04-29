@@ -146,7 +146,7 @@ docker buildx build . -t my_moodle_image:my_tag \
     --build-arg ARG_MOODLE_PLUGIN_LIST='mod_attendance,mod_checklist,mod_customcert,block_checklist,gradeexport_checklist'
 ```
 
-### Container
+### Base Image
 Refer to https://github.com/jimsihk/alpine-php-nginx/blob/dev/README.md
 
 ## Known Issues
