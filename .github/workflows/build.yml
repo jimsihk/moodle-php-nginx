@@ -27,7 +27,6 @@ jobs:
         run: |
           DOCKER_PLATFORMS=${{ vars.CONTAINER_ARCH }}
 
-#          VERSION=${GITHUB_REF#refs/*/}
           VERSION="beta"
           TAGS="${{ env.IMAGE_NAME }}:${VERSION}"
 
