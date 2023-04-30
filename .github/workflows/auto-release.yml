@@ -61,9 +61,9 @@ jobs:
           # format moodle version number to tag format
           # <branch>.<version (last 4 digits, leading zero removed)>.0
           # e.g. branch 401 & version 2022112801.04 of v4.1.1 --> 401.104.0
-          T1=$MOODLE_BRANCH
-          T2=`echo $MOODLE_VERSION | cut -d'.' -f1 | cut -c9- | sed 's/^0*//'`
-          T3=`echo $MOODLE_VERSION | cut -d'.' -f2`
+          T1="$MOODLE_BRANCH"
+          T2=$(printf "%01d" "$(echo $MOODLE_VERSION | cut -d'.' -f1 | cut -c9- | sed 's/^0*//')")
+          T3=$(echo $MOODLE_VERSION | cut -d'.' -f2)
           MOODLE_TAG="$T1.$T2$T3.0"
           echo "tag=${MOODLE_TAG}" >> $GITHUB_OUTPUT
 
