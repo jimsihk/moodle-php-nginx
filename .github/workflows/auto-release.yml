@@ -30,22 +30,25 @@ jobs:
         uses: actions/checkout@v3
         with:
           token: ${{ steps.generate_release_token.outputs.token }}
+          fetch-depth: 0
 
       - name: Load tag history and suggest next tag
         id: analyze_tag_history
-        uses: anothrNick/github-tag-action@1.62.0
-        env:
-          GITHUB_TOKEN: ${{ steps.generate_release_token.outputs.token }}
-          WITH_V: false
-          DRY_RUN: true
-          DEFAULT_BUMP: patch
-          RELEASE_BRANCHES: ${{ vars.RELEASE_BRANCHES }}
+        run: |
+          # Retrieve latest tag
+          LAST_TAG=`git describe --tags $(git rev-list --tags --max-count=1)`
+          MAJOR_MINOR_V="$(echo $LAST_TAG | cut -d'.' -f1,2)"
+          PATCH_V="$(echo $LAST_TAG | cut -d'.' -f3)"
 
-      - name: Set next version
+          # default increment only the patch version
+          NEW_PATCH_V="$((PATCH_V+1))"
+          NEW_TAG="${MAJOR_MINOR_V}.${NEW_PATCH_V}"
+          echo "new_tag=${NEW_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Set next suggested tag version
         id: next_tag_version
         run: |
           echo "new_tag=${{ steps.analyze_tag_history.outputs.new_tag }}" >> $GITHUB_OUTPUT
-          echo "previous_tag=${{ steps.analyze_tag_history.outputs.tag }}" >> $GITHUB_OUTPUT
 
       - name: Get container Moodle version
         id: moodle_version
@@ -75,31 +78,34 @@ jobs:
         id: get_changes
         run: |
           echo "[${{ steps.moodle_version.outputs.tag }}] vs [${{ steps.next_tag_version.outputs.new_tag }}]"
-          if [ -n "${{ steps.next_tag_version.outputs.new_tag }}" ]
+          # Compare up to minor version
+          PREFIX_MOODLE_TAG=`echo ${{ steps.moodle_version.outputs.tag }} | cut -d'.' -f1,2`
+          PREFIX_NEW_TAG=`echo ${{ steps.next_tag_version.outputs.new_tag }} | cut -d'.' -f1,2`
+          if [ "$PREFIX_MOODLE_TAG" = "$PREFIX_NEW_TAG" ];
           then
-            # Compare up to minor version
-            PREFIX_MOODLE_TAG=`echo ${{ steps.moodle_version.outputs.tag }} | cut -d'.' -f1,2`
-            PREFIX_NEW_TAG=`echo ${{ steps.next_tag_version.outputs.new_tag }} | cut -d'.' -f1,2`
-            if [ "$PREFIX_MOODLE_TAG" = "$PREFIX_NEW_TAG" ];
-            then
-              # same Moodle minor version
-              echo "Use ${{ steps.next_tag_version.outputs.new_tag }}"
-              echo "new_tag=${{ steps.next_tag_version.outputs.new_tag }}" >> $GITHUB_OUTPUT
-            else
-              # Moodle minor version changed
-              echo "Use ${{ steps.moodle_version.outputs.tag }}"
-              echo "new_tag=${{ steps.moodle_version.outputs.tag }}" >> $GITHUB_OUTPUT
-            fi
+            # same Moodle minor version
+            echo "Use ${{ steps.next_tag_version.outputs.new_tag }}"
+            echo "new_tag=${{ steps.next_tag_version.outputs.new_tag }}" >> $GITHUB_OUTPUT
           else
-            echo "No change is detected"
-            echo "new_tag=${{ steps.next_tag_version.outputs.previous_tag }}" >> $GITHUB_OUTPUT
+            # Moodle minor version changed
+            echo "Use ${{ steps.moodle_version.outputs.tag }}"
+            echo "new_tag=${{ steps.moodle_version.outputs.tag }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Generate release name
         id: release_detail
         run: |
+          # Generate release name base on the tag e.g. v4.1.3.02-3
+          # Moodle major, minor, patch version, e.g. 4.1.3
           R1=`echo "${{ steps.moodle_version.outputs.release }}" | sed 's/ //g' | cut -d'(' -f1 | sed 's/\+//g'`
+          # Manually append the patch version ".0" if not found in Moodle version
+          if [ "${R1//[^.]}" = '.' ]
+          then
+            R1="${R1}.0"
+          fi
+          # Moodle incremental, e.g. 02
           R2=`echo "${{ steps.moodle_version.outputs.version }}" | cut -d'.' -f2`
+          # Repo release, e.g. 3
           R3=`echo "${{ steps.get_changes.outputs.new_tag }}" | cut -d'.' -f3`
           R_NAME="v$R1.$R2-$R3"
           echo "release_name=$R_NAME" >> $GITHUB_OUTPUT
