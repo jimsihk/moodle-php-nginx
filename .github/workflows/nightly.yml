@@ -3,8 +3,6 @@ name: Nightly Build
 on:
   schedule:
     - cron: '00 20 * * *' #UTC
-  push:
-    branches: ["fix/night-build"]
 
 permissions:
   contents: read
@@ -32,26 +30,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-#      - name: Build and Test
-#        run: |
-#          export TEST_IMAGE_NAME=${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-#          docker compose --file docker-compose.test.yml up --exit-code-from sut -t 10 --build
-#
-#      - name: Build and push
-#        uses: docker/build-push-action@v4
-#        with:
-#          context: .
-#          push: true
-#          tags: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-#
-#  scan-nightly-build:
-#    permissions:
-#      contents: read # for actions/checkout to fetch code
-#      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-#    uses: ./.github/workflows/scan.yml
-#    needs: [build-container]
-#    with:
-#      image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly
+      - name: Build and Test
+        run: |
+          export TEST_IMAGE_NAME=${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          docker compose --file docker-compose.test.yml up --exit-code-from sut -t 10 --build
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+
+  scan-nightly-build:
+    permissions:
+      contents: read # for actions/checkout to fetch code
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+    uses: ./.github/workflows/scan.yml
+    needs: [build-container]
+    with:
+      image: ${{ vars.REGISTRY_NIGHTLY }}/${{ github.repository }}:nightly
 
   tag-and-release:
     permissions:
