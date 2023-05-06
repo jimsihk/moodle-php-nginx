@@ -39,7 +39,7 @@ jobs:
           LAST_TAG=`git describe --tags $(git rev-list --tags --max-count=1)`
           MAJOR_MINOR_V="$(echo $LAST_TAG | cut -d'.' -f1,2)"
           PATCH_V="$(echo $LAST_TAG | cut -d'.' -f3)"
-          
+
           # default increment only the patch version
           NEW_PATCH_V="$((PATCH_V+1))"
           NEW_TAG="${MAJOR_MINOR_V}.${NEW_PATCH_V}"
