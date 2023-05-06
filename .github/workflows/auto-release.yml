@@ -101,7 +101,7 @@ jobs:
           # Manually append the patch version ".0" if not found in Moodle version
           if [ "${R1//[^.]}" = '.' ]
           then
-            R1="$(R1).0"
+            R1="${R1}.0"
           fi
           # Moodle incremental, e.g. 02
           R2=`echo "${{ steps.moodle_version.outputs.version }}" | cut -d'.' -f2`
