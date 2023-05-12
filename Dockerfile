@@ -5,13 +5,13 @@ LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
       Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux."
 
 # renovate: datasource=repology depName=alpine_3_17/dcron versioning=loose
-ARG DCRON_VERSION="=4.5-r8"
+ARG DCRON_VERSION="=4.5-r9"
 # renovate: datasource=repology depName=alpine_3_17/libcap versioning=loose
-ARG LIBCAP_VERSION="=2.66-r0"
+ARG LIBCAP_VERSION="=2.68-r2"
 # renovate: datasource=repology depName=alpine_3_17/git versioning=loose
-ARG GIT_VERSION="=2.38.5-r0"
+ARG GIT_VERSION="=2.40.1-r0"
 # renovate: datasource=repology depName=alpine_3_17/bash versioning=loose
-ARG BASH_VERSION="=5.2.15-r0"
+ARG BASH_VERSION="=5.2.15-r3"
 
 ARG WEB_PATH='/var/www/html'
 
