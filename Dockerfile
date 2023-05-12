@@ -1,4 +1,4 @@
-ARG ARCH=
+ARG ARCH=quay.io/
 FROM ${ARCH}jimsihk/alpine-php-nginx:81.19.0
 
 LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
