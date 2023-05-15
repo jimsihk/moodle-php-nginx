@@ -7,7 +7,7 @@ LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
 # renovate: datasource=repology depName=alpine_3_18/dcron versioning=loose
 ARG DCRON_VERSION="=4.5-r9"
 # renovate: datasource=repology depName=alpine_3_18/libcap versioning=loose
-ARG LIBCAP_VERSION="=2.68-r2"
+ARG LIBCAP_VERSION="=2.69-r0"
 # renovate: datasource=repology depName=alpine_3_18/git versioning=loose
 ARG GIT_VERSION="=2.40.1-r0"
 # renovate: datasource=repology depName=alpine_3_18/bash versioning=loose
