@@ -11,7 +11,7 @@ ARG LIBCAP_VERSION="=2.69-r0"
 # renovate: datasource=repology depName=alpine_3_18/git versioning=loose
 ARG GIT_VERSION="=2.40.1-r0"
 # renovate: datasource=repology depName=alpine_3_18/bash versioning=loose
-ARG BASH_VERSION="=5.2.15-r3"
+ARG BASH_VERSION="=5.2.15-r5"
 
 ARG WEB_PATH='/var/www/html'
 
