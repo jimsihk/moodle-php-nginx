@@ -1,5 +1,5 @@
 ARG ARCH=quay.io/
-FROM ${ARCH}jimsihk/alpine-php-nginx:81.19.5
+FROM ${ARCH}jimsihk/alpine-php-nginx:81.19.6
 
 LABEL Maintainer="99048231+jimsihk@users.noreply.github.com" \
       Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux."
