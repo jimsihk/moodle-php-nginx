@@ -35,12 +35,23 @@ fi
 # Give it another 3 seconds.
 sleep 3;
 
+# Verify the source code integrity
+# - Check if new volume is mounted that Moodle code directory will be empty
+# - Download the Moodle source code in the same way as specified in DockerFile
+if [ -z "$(ls -A "${WEB_PATH}")" ]; then
+  echo "Downloading Moodle source codes..."
+  /usr/libexec/moodle/download-moodle-code
+fi
+if [ ! -f "${WEB_PATH}"/admin/cli/isinstalled.php ]; then
+  echo "Copying isinstalled.php..."
+  cp -p /usr/libexec/moodle/isinstalled.php "${WEB_PATH}"/admin/cli/
+fi
 
 # Check if the config.php file exists
-if [ ! -f /var/www/html/config.php ]; then
+if [ ! -f "${WEB_PATH}"/config.php ]; then
 
     echo "Generating config.php file..."
-    ENV_VAR='var' php -d max_input_vars=10000 /var/www/html/admin/cli/install.php \
+    ENV_VAR='var' php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/install.php \
         --lang="$MOODLE_LANGUAGE" \
         --wwwroot="$SITE_URL" \
         --dataroot=/var/www/moodledata/ \
@@ -64,43 +75,43 @@ if [ ! -f /var/www/html/config.php ]; then
     # Set extra database settings
     if [ -n "$DB_FETCHBUFFERSIZE" ]; then
       # shellcheck disable=SC2016
-      sed -i "/\$CFG->dboptions/a \ \ "\''fetchbuffersize'\'" => $DB_FETCHBUFFERSIZE," /var/www/html/config.php
+      sed -i "/\$CFG->dboptions/a \ \ "\''fetchbuffersize'\'" => $DB_FETCHBUFFERSIZE," "${WEB_PATH}"/config.php
     fi
     if [ "$DB_DBHANDLEOPTIONS" = 'true' ]; then
       # shellcheck disable=SC2016
-      sed -i "/\$CFG->dboptions/a \ \ "\''dbhandlesoptions'\'" => true," /var/www/html/config.php
+      sed -i "/\$CFG->dboptions/a \ \ "\''dbhandlesoptions'\'" => true," "${WEB_PATH}"/config.php
     fi
     if [ -n "$DB_HOST_REPLICA" ]; then
       if [ -n "$DB_USER_REPLICA" ] && [ -n "$DB_PASS_REPLICA" ] && [ -n "$DB_PORT_REPLICA" ]; then
         # shellcheck disable=SC2016
-        sed -i "/\$CFG->dboptions/a \ \ "\''readonly'\'" => [ \'instance\' => [ \'dbhost\' => \'$DB_HOST_REPLICA\', \'dbport\' => \'$DB_PORT_REPLICA\', \'dbuser\' => \'$DB_USER_REPLICA\', \'dbpass\' => \'$DB_PASS_REPLICA\' ] ]," /var/www/html/config.php
+        sed -i "/\$CFG->dboptions/a \ \ "\''readonly'\'" => [ \'instance\' => [ \'dbhost\' => \'$DB_HOST_REPLICA\', \'dbport\' => \'$DB_PORT_REPLICA\', \'dbuser\' => \'$DB_USER_REPLICA\', \'dbpass\' => \'$DB_PASS_REPLICA\' ] ]," "${WEB_PATH}"/config.php
       else
         # shellcheck disable=SC2016
-        sed -i "/\$CFG->dboptions/a \ \ "\''readonly'\'" => [ \'instance\' => [ \'$DB_HOST_REPLICA\' ] ]," /var/www/html/config.php
+        sed -i "/\$CFG->dboptions/a \ \ "\''readonly'\'" => [ \'instance\' => [ \'$DB_HOST_REPLICA\' ] ]," "${WEB_PATH}"/config.php
       fi
     fi
     #'readonly' => [ 'instance' => ['dbhost' => 'slave.dbhost', 'dbport' => '', 'dbuser' => '', 'dbpass' => '']]
 
     if [ "$SSLPROXY" = 'true' ]; then
         # shellcheck disable=SC2016
-        sed -i '/require_once/i $CFG->sslproxy = true;' /var/www/html/config.php
+        sed -i '/require_once/i $CFG->sslproxy = true;' "${WEB_PATH}"/config.php
     fi
 
     # Avoid cron failure by forcing to use database as lock factory
     # https://moodle.org/mod/forum/discuss.php?d=328300#p1320902
     # shellcheck disable=SC2016
-    sed -i '/require_once/i $CFG->lock_factory = '\''\\\\core\\\\lock\\\\db_record_lock_factory'\'';' /var/www/html/config.php
+    sed -i '/require_once/i $CFG->lock_factory = '\''\\\\core\\\\lock\\\\db_record_lock_factory'\'';' ${WEB_PATH}/config.php
 
     # Avoid allowing executable paths to be set via the Admin GUI
-    echo "\$CFG->preventexecpath = true;" >> /var/www/html/config.php
+    echo "\$CFG->preventexecpath = true;" >> "${WEB_PATH}"/config.php
 
 fi
 
 # Check if the database is already installed
-if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
+if php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/isinstalled.php ; then
 
     echo "Installing database..."
-    php -d max_input_vars=10000 /var/www/html/admin/cli/install_database.php \
+    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/install_database.php \
         --lang="$MOODLE_LANGUAGE" \
         --adminuser="$MOODLE_USERNAME" \
         --adminpass="$MOODLE_PASSWORD" \
@@ -111,21 +122,21 @@ if php -d max_input_vars=10000 /var/www/html/admin/cli/isinstalled.php ; then
 
     echo "Configuring settings..."
 
-    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=slasharguments --set=0
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtophp --set=/usr/bin/php
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtodu --set=/usr/bin/du
-    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=aspellpath --set=/usr/bin/aspell
-    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtodot --set=/usr/bin/dot
-    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtogs --set=/usr/bin/gs
-    # php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=pathtopython --set=/usr/bin/python3
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=enableblogs --set=0
+    # php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=slasharguments --set=0
+    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=pathtophp --set=/usr/bin/php
+    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=pathtodu --set=/usr/bin/du
+    # php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=aspellpath --set=/usr/bin/aspell
+    # php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=pathtodot --set=/usr/bin/dot
+    # php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=pathtogs --set=/usr/bin/gs
+    # php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=pathtopython --set=/usr/bin/python3
+    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=enableblogs --set=0
 
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtphosts --set="$SMTP_HOST":"$SMTP_PORT"
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtpuser --set="$SMTP_USER"
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtppass --set="$SMTP_PASSWORD"
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=smtpsecure --set="$SMTP_PROTOCOL"
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=noreplyaddress --set="$MOODLE_MAIL_NOREPLY_ADDRESS"
-    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=emailsubjectprefix --set="$MOODLE_MAIL_PREFIX"
+    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=smtphosts --set="$SMTP_HOST":"$SMTP_PORT"
+    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=smtpuser --set="$SMTP_USER"
+    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=smtppass --set="$SMTP_PASSWORD"
+    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=smtpsecure --set="$SMTP_PROTOCOL"
+    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=noreplyaddress --set="$MOODLE_MAIL_NOREPLY_ADDRESS"
+    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=emailsubjectprefix --set="$MOODLE_MAIL_PREFIX"
 fi
 
 # Post installation setup
@@ -149,11 +160,11 @@ config_session_cache() {
             # Give it another 3 seconds.
             sleep 3;
             if [ -n "$SESSION_CACHE_HOST" ] && [ -n "$SESSION_CACHE_PORT" ] ; then
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_handler_class --set='\core\session\memcached'
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_save_path --set="$SESSION_CACHE_HOST:$SESSION_CACHE_PORT"
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_prefix --set="$SESSION_CACHE_PREFIX.memc.sess.key."
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_acquire_lock_timeout --set=120
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_memcached_lock_expire --set=7200
+                php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_handler_class --set='\core\session\memcached'
+                php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_memcached_save_path --set="$SESSION_CACHE_HOST:$SESSION_CACHE_PORT"
+                php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_memcached_prefix --set="$SESSION_CACHE_PREFIX.memc.sess.key."
+                php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_memcached_acquire_lock_timeout --set=120
+                php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_memcached_lock_expire --set=7200
             fi
             ;;
         redis)
@@ -168,21 +179,21 @@ config_session_cache() {
             # Give it another 3 seconds.
             sleep 3;
             if [ -n "$SESSION_CACHE_HOST" ] && [ -n "$SESSION_CACHE_PORT" ] ; then
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_handler_class --set='\core\session\redis'
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_host --set="$SESSION_CACHE_HOST"
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_port --set="$SESSION_CACHE_PORT"
+                php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_handler_class --set='\core\session\redis'
+                php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_redis_host --set="$SESSION_CACHE_HOST"
+                php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_redis_port --set="$SESSION_CACHE_PORT"
                 if [ -n "$SESSION_CACHE_AUTH" ] ; then
-                    php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_auth --set="$SESSION_CACHE_AUTH"
+                    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_redis_auth --set="$SESSION_CACHE_AUTH"
                 fi
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_prefix --set="$SESSION_CACHE_PREFIX"
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_acquire_lock_timeout --set=120
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_lock_expire --set=7200
-                php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_redis_serializer_use_igbinary --set='true'
+                php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_redis_prefix --set="$SESSION_CACHE_PREFIX"
+                php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_redis_acquire_lock_timeout --set=120
+                php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_redis_lock_expire --set=7200
+                php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_redis_serializer_use_igbinary --set='true'
             fi
             ;;
         database)
-            php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_handler_class --set='\core\session\database'
-            php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=session_database_acquire_lock_timeout --set=120
+            php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_handler_class --set='\core\session\database'
+            php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=session_database_acquire_lock_timeout --set=120
             ;;
     esac
   fi
@@ -191,13 +202,13 @@ config_session_cache() {
 config_session_cache
 
 # Remove .swf (flash) plugin for security reasons DISABLED BECAUSE IS REQUIRED
-#php -d max_input_vars=10000 /var/www/html/admin/cli/uninstall_plugins.php --plugins=media_swf --run
+#php -d max_input_vars=10000 ${WEB_PATH}/admin/cli/uninstall_plugins.php --plugins=media_swf --run
 
 # Disable plugin installation via the Admin GUI
 if [ "$DISABLE_WEB_INSTALL_PLUGIN" = 'true' ]; then
-  php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=disableupdateautodeploy --set=1
+  php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=disableupdateautodeploy --set=1
 else
-  php -d max_input_vars=10000 /var/www/html/admin/cli/cfg.php --name=disableupdateautodeploy --set=0
+  php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/cfg.php --name=disableupdateautodeploy --set=0
 fi
 
 # Avoid writing the config file
@@ -213,20 +224,20 @@ if [ -z "$AUTO_UPDATE_MOODLE" ] || [ "$AUTO_UPDATE_MOODLE" = true ]; then
   # in order to avoid interruption to users while moodle restart
   echo "Checking maintenance status..."
   START_IN_MAINT_MODE=false
-  MAINT_STATUS=$(php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php | sed 's/^==.*==//g' | sed '/^$/d')
+  MAINT_STATUS=$(php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/maintenance.php | sed 's/^==.*==//g' | sed '/^$/d')
   if [ "$MAINT_STATUS" = "$MAINT_STATUS_KEYWORD" ]; then
       echo "Maintenance mode will be kept enabled"
       START_IN_MAINT_MODE=true
   fi
   echo "Upgrading moodle..."
-  php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --enable
+  php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/maintenance.php --enable
   if [ -z "$UPDATE_MOODLE_CODE" ] || [ "$UPDATE_MOODLE_CODE" = true ]; then
     echo "Checking moodle code version..."
-    git -C /var/www/html fetch origin "$MODOLE_GIT_BRANCH" --depth=1 && git -C /var/www/html checkout FETCH_HEAD -B "$MODOLE_GIT_BRANCH"
+    git -C ${WEB_PATH} fetch origin "$MODOLE_GIT_BRANCH" --depth=1 && git -C ${WEB_PATH} checkout FETCH_HEAD -B "$MODOLE_GIT_BRANCH"
   fi
-  php -d max_input_vars=10000 /var/www/html/admin/cli/upgrade.php --non-interactive --allow-unstable
+  php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/upgrade.php --non-interactive --allow-unstable
   if [ $START_IN_MAINT_MODE = false ]; then
-      php -d max_input_vars=10000 /var/www/html/admin/cli/maintenance.php --disable
+      php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/maintenance.php --disable
   else
       echo "Started in maintenance mode, requires manual disable the maintenance mode"
   fi

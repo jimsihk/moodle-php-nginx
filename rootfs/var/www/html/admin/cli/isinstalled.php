@@ -8,6 +8,6 @@ if (isset($_SERVER['REMOTE_ADDR'])) {
 $configfile = __DIR__.'/../../config.php';
 require($configfile);
 if ($DB->get_tables() ) {
-    // If tables exists, a previous instalation is found, so exit with error
+    // If tables exists, a previous installation is found, so exit with error
     exit(2);
 }
