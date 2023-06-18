@@ -56,9 +56,4 @@ rm -rf "${TEMP_MOODLE_PATH}"
 
 # 3. Install custom plugins
 #
-# Install additional plugins (a space/comma separated argument), if any
-# Reference: https://github.com/krestomatio/container_builder/tree/master/moodle#moodle-plugins
-if [ -n "${MOODLE_PLUGIN_LIST}" ]; then
-  "$UTL_PATH"/install-plugin-list -p "${MOODLE_PLUGIN_LIST}";
-fi
-rm -rf /tmp/moodle-plugins
+"$UTL_PATH"/download-moodle-plugin

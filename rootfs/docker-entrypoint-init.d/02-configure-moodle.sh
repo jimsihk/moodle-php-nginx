@@ -38,7 +38,8 @@ sleep 3;
 # Verify the source code integrity
 # - Check if new volume is mounted that Moodle code directory will be empty
 # - Download the Moodle source code in the same way as specified in DockerFile
-if [ -z "$(ls -A "${WEB_PATH}")" ]; then
+# shellcheck disable=SC2010
+if [ -z "$(ls -A "${WEB_PATH}" | grep -v 'config.php')" ]; then
   echo "Downloading Moodle source codes..."
   /usr/libexec/moodle/download-moodle-code
 fi
@@ -233,7 +234,7 @@ if [ -z "$AUTO_UPDATE_MOODLE" ] || [ "$AUTO_UPDATE_MOODLE" = true ]; then
   php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/maintenance.php --enable
   if [ -z "$UPDATE_MOODLE_CODE" ] || [ "$UPDATE_MOODLE_CODE" = true ]; then
     echo "Checking moodle code version..."
-    git -C ${WEB_PATH} fetch origin "$MODOLE_GIT_BRANCH" --depth=1 && git -C ${WEB_PATH} checkout FETCH_HEAD -B "$MODOLE_GIT_BRANCH"
+    git -C "${WEB_PATH}" fetch origin "$MODOLE_GIT_BRANCH" --depth=1 && git -C "${WEB_PATH}" checkout FETCH_HEAD -B "$MODOLE_GIT_BRANCH"
   fi
   php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/upgrade.php --non-interactive --allow-unstable
   if [ $START_IN_MAINT_MODE = false ]; then
