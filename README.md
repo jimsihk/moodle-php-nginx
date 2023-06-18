@@ -119,13 +119,14 @@ If a cluster of Moodle containers are deployed for HA (e.g. on Kubernetes), it i
 ## Custom builds
 ### Moodle plugins
 
-For installing plugins while building the main Dockerfile (slower), use `ARG_MOODLE_PLUGIN_LIST`:
+#### `ARG_MOODLE_PLUGIN_LIST`: define the list of plugins
+- For installing plugins while building the main Dockerfile (slower), use `ARG_MOODLE_PLUGIN_LIST`:
 ```
 docker buildx build . -t my_moodle_image:my_tag \
     --build-arg ARG_MOODLE_PLUGIN_LIST='mod_attendance mod_checklist mod_customcert block_checklist gradeexport_checklist'
 ```
-For building only to install additional moodle plugins (faster), create a Dockerfile like the following and then build.
-Example of `Dockerfile.plugins`:
+- For building only to install additional moodle plugins (faster), create a Dockerfile like the following and then build.
+- Example of `Dockerfile.plugins`:
 ```dockerfile
 # Dockerfile.plugins
 FROM quay.io/jimsihk/alpine-moodle:latest
@@ -133,17 +134,46 @@ FROM quay.io/jimsihk/alpine-moodle:latest
 # Install additional plugins, a space/comma separated arg, (optional)
 # Run install-plugin-list with argument "-f" to force install 
 #   if the plugin is not compatible with current Moodle version
-ARG ARG_MOODLE_PLUGIN_LIST=""
+ARG ARG_MOODLE_PLUGIN_LIST=''
 ENV MOODLE_PLUGIN_LIST=${ARG_MOODLE_PLUGIN_LIST}
 RUN if [ -n "${MOODLE_PLUGIN_LIST}" ]; then /usr/libexec/moodle/install-plugin-list -p "${MOODLE_PLUGIN_LIST}"; fi && \
     rm -rf /tmp/moodle-plugins
 ```
-Example of build using `Dockerfile.plugins`:
+- Since v4.2.1.02-2 (402.102.2), this could be further simplified into:
+```dockerfile
+# Dockerfile.plugins
+FROM quay.io/jimsihk/alpine-moodle:latest
+
+# Install additional plugins, a space/comma separated arg, (optional)
+ARG ARG_MOODLE_PLUGIN_LIST=''
+ENV MOODLE_PLUGIN_LIST=${ARG_MOODLE_PLUGIN_LIST}
+RUN /usr/libexec/moodle/download-moodle-plugin
+```
+- Example of build using `Dockerfile.plugins`:
 ```
 # Build
 docker buildx build . -t my_moodle_image:my_tag \
     -f Dockerfile.plugins \
     --build-arg ARG_MOODLE_PLUGIN_LIST='mod_attendance,mod_checklist,mod_customcert,block_checklist,gradeexport_checklist'
+```
+
+#### `ARG_ALLOW_INCOMPATIBLE_PLUGIN`: allow installing incompatible plugins 
+- Since v4.2.1.02-2 (402.102.2), `ARG_ALLOW_INCOMPATIBLE_PLUGIN` is also available to easily control if continue the installation of latest available version despite lack of compatibility from maturity, default as `false`:
+```
+docker buildx build . -t my_moodle_image:my_tag \
+    --build-arg ARG_MOODLE_PLUGIN_LIST='mod_attendance mod_checklist mod_customcert block_checklist gradeexport_checklist' \
+    --build-arg ARG_ALLOW_INCOMPATIBLE_PLUGIN='true'
+```
+- Or using a custom `Dockerfile.plugins`:
+```dockerfile
+# Dockerfile.plugins
+FROM quay.io/jimsihk/alpine-moodle:latest
+
+ARG ARG_MOODLE_PLUGIN_LIST='mod_attendance mod_checklist mod_customcert block_checklist gradeexport_checklist'
+ARG ARG_ALLOW_INCOMPATIBLE_PLUGIN='true'
+ENV MOODLE_PLUGIN_LIST=${ARG_MOODLE_PLUGIN_LIST}
+ENV ALLOW_INCOMPATIBLE_PLUGIN=${ARG_ALLOW_INCOMPATIBLE_PLUGIN}
+RUN /usr/libexec/moodle/download-moodle-plugin
 ```
 
 ### Base Image
