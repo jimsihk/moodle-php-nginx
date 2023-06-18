@@ -38,7 +38,8 @@ sleep 3;
 # Verify the source code integrity
 # - Check if new volume is mounted that Moodle code directory will be empty
 # - Download the Moodle source code in the same way as specified in DockerFile
-if [ -z "$(ls -A "${WEB_PATH}" | grep -v config.php)" ]; then
+# shellcheck disable=SC2010
+if [ -z "$(ls -A "${WEB_PATH}" | grep -v 'config.php')" ]; then
   echo "Downloading Moodle source codes..."
   /usr/libexec/moodle/download-moodle-code
 fi
