@@ -1,6 +1,9 @@
 #! /bin/bash -eu
 # Description: install moodle plugin(s) by component name
 # Forked from https://github.com/krestomatio/container_builder/blob/master/.ansible-ci/files/templated_contexts/moodle_php-fpm/conf/usr/libexec/moodle/install-plugin-list
+# - Corrected typo
+# - Adjusted some commands to make code smell happy
+# - Added plugin name when error in PHP function install_path
 # TODO: port to /bin/sh
 
 usage() {
@@ -83,7 +86,7 @@ $MOODLE_API_PLUGIN_INFO = getenv('MOODLE_API_PLUGIN_INFO') ?: 'https://download.
 $MOODLE_PLUGIN_COMPONENT_NAME = getenv('script_moodle_plugin_component_name');
 $MOODLE_RELEASE = getenv('MOODLE_RELEASE');
 $MOODLE_PLUGIN_FORCE = getenv("script_moodle_plugin_force");
-$MOODLE_PLUGIN_MATURITY = (int) getenv('script_moodle_plugin_maturiy') ?: 0;
+$MOODLE_PLUGIN_MATURITY = (int) getenv('script_moodle_plugin_maturity') ?: 0;
 $to_be_installed = $MOODLE_PLUGIN_FORCE == "true" ? true : false;
 
 # not empty plugin component name
@@ -186,13 +189,13 @@ if ($response) {
         if (in_array($MOODLE_RELEASE, array_column($supported_moodle_release, 'release'))) {
             $to_be_installed = true;
         } else {
-            file_put_contents("php://stderr", "ERROR: Versions available are not compatible with moodle release: " . $MOODLE_RELEASE . "\n");
+            file_put_contents("php://stderr", "ERROR: Versions available for [$MOODLE_PLUGIN_COMPONENT_NAME] are not compatible with moodle release: " . $MOODLE_RELEASE . "\n");
             exit(1);
         }
         if ($moodle_plugin_info_maturity >= $MOODLE_PLUGIN_MATURITY) {
             $to_be_installed = true;
         } else {
-            file_put_contents("php://stderr", "ERROR: Maturity level of version avaiable is below: " . $MOODLE_PLUGIN_MATURITY . "\n");
+            file_put_contents("php://stderr", "ERROR: Maturity level of version available for [$MOODLE_PLUGIN_COMPONENT_NAME] is below: " . $MOODLE_PLUGIN_MATURITY . "\n");
             exit(1);
         }
     }
@@ -202,7 +205,7 @@ if ($response) {
         exit(0);
     }
 }
-file_put_contents("php://stderr", "ERROR: No plugin info.\n");
+file_put_contents("php://stderr", "ERROR: No plugin info for [$MOODLE_PLUGIN_COMPONENT_NAME].\n");
 exit(1);
 ?>
 CODE
@@ -215,7 +218,7 @@ export script_moodle_plugin_list
 export script_moodle_app=${MOODLE_APP:-/var/www/html}
 export script_moodle_api_plugin_list=${MOODLE_API_PLUGIN_INFO:-https://download.moodle.org/api/1.3/pluginfo.php}
 export script_moodle_plugin_force=
-export script_moodle_plugin_maturiy=0
+export script_moodle_plugin_maturity=0
 
 while getopts ":fp:m:" opt; do
   case ${opt} in
@@ -227,7 +230,7 @@ while getopts ":fp:m:" opt; do
         IFS=',' read -r -a script_moodle_plugin_list <<< "${moodle_plugin_comma_list// /}"
         ;;
     m )
-        script_moodle_plugin_maturiy="${OPTARG}"
+        script_moodle_plugin_maturity="${OPTARG}"
         ;;
     \? )
         usage
