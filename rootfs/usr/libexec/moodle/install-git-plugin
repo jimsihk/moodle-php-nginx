@@ -15,8 +15,7 @@ then
   PLUGIN_GIT_BRANCH="$2"
   PLUGIN_GIT_COMMIT="$3"
   PLUGIN_PATH="$4"
-  git clone "${PLUGIN_GIT_URL}" --branch "${PLUGIN_GIT_BRANCH}" --depth 1 "${PLUGIN_PATH}"
-  /usr/libexec/check-git-commit "${PLUGIN_PATH}" "${PLUGIN_GIT_COMMIT}"
+  /usr/libexec/clone-from-git "${PLUGIN_GIT_URL}" "${PLUGIN_GIT_BRANCH}" "${PLUGIN_GIT_COMMIT}" "${PLUGIN_PATH}"
 else
   echo "Missing argument: <repo> <branch> <commit_hash> <local_path>"
   exit 1
