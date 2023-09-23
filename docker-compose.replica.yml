@@ -1,0 +1,79 @@
+version: '2'
+services:
+
+  postgres:
+    image: postgres:alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=moodle
+      - POSTGRES_USER=moodle
+      - POSTGRES_DB=moodle
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  redis:
+    image: redis/redis-stack-server
+    restart: unless-stopped
+    volumes:
+      - redis:/data
+
+  moodle:
+    image: jimsihk/alpine-moodle
+    restart: unless-stopped
+    deploy:
+      replicas: 2
+    environment:
+      - LANG=en_US.UTF-8
+      - LANGUAGE=en_US:en
+      - SITE_URL=http://localhost
+      - DB_TYPE=pgsql
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=moodle
+      - DB_USER=moodle
+      - DB_PASS=moodle
+      - DB_PREFIX=mdl_
+      - SSLPROXY=false
+      - MOODLE_EMAIL=user@example.com
+      - MOODLE_LANGUAGE=en
+      - MOODLE_SITENAME=New-Site
+      - MOODLE_USERNAME=moodleuser
+      - MOODLE_PASSWORD=PLEASE_CHANGEME
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=your_email@gmail.com
+      - SMTP_PASSWORD=your_password
+      - SMTP_PROTOCOL=tls
+      - MOODLE_MAIL_NOREPLY_ADDRESS=noreply@localhost
+      - MOODLE_MAIL_PREFIX=[moodle]
+      - AUTO_UPDATE_MOODLE=true
+      # not suggest to enable auto update Moodle core code as it may 
+      #   cause discrepancy between code and database, alternatively
+      #   may start with 1 replica and then scale up after successfully
+      #   deploy and update
+      - UPDATE_MOODLE_CODE=false
+      # uncomment below to define the session cache upon installation
+      #   note: config.php will need to be changed when reverting this config
+#      - SESSION_CACHE_TYPE=redis
+#      - SESSION_CACHE_HOST=redis
+#      - SESSION_CACHE_PORT=6379
+#      - SESSION_CACHE_PREFIX=mdl
+    volumes:
+      - moodledata:/var/www/moodledata
+    depends_on:
+      - postgres
+      - redis
+
+  loadbalancer:
+    image: nginx
+    volumes:
+      - ./nginx-lb.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - moodle
+
+volumes:
+  postgres: null
+  moodledata: null
+  redis: null

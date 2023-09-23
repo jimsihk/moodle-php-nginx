@@ -6,8 +6,14 @@ services:
     environment:
       - SITE_URL=http://app:8080
       - MOODLE_SITENAME=Dockerized_Moodle
+      - SESSION_CACHE_TYPE=redis
+      - SESSION_CACHE_HOST=redis
+      - SESSION_CACHE_PORT=6379
+      - AUTO_UPDATE_MOODLE=false
+      - UPDATE_MOODLE_CODE=false
     depends_on:
       - postgres
+      - redis
 
   postgres:
     image: postgres:alpine
@@ -15,6 +21,9 @@ services:
       - POSTGRES_PASSWORD=moodle
       - POSTGRES_USER=moodle
       - POSTGRES_DB=moodle
+        
+  redis:
+    image: redis/redis-stack-server
 
   sut:
     image: alpine:latest

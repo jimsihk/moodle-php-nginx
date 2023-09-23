@@ -24,7 +24,6 @@ Repository: https://github.com/jimsihk/alpine-moodle
 * Optimized to only use resources when there's traffic (by using PHP-FPM's ondemand PM)
 * Use of runit instead of supervisord to reduce memory footprint
 * Configured cron to run as non-privileged user https://github.com/gliderlabs/docker-alpine/issues/381#issuecomment-621946699
-* docker-compose sample with PostgreSQL
 * Configuration via ENV variables
 * Auto update Moodle plugin and upgrade to newer Moodle versions (via `ARG_MOODLE_GIT_URL` and `ARG_MOODLE_GIT_BRANCH` at build time, `MOODLE_GIT_URL` and `MOODLE_GIT_BRANCH` at run time) when container start 
 * The servers NGINX, PHP-FPM run under a non-privileged user (nobody) to make it more secure
@@ -56,10 +55,21 @@ The images are available on multiple registries:
 ## Usage
 
 Start the Docker containers:
-
-    docker-compose up
+```
+docker compose up
+```
+or 
+```
+docker compose --file docker-compose-replica.yml up
+```
 
 Login on the system using the provided credentials (ENV vars)
+
+#### Sample docker-compose files
+* [docker-compose.yaml](docker-compose.yaml) - with PostgreSQL
+* [docker-compose-replica.yaml](docker-compose.replica.yaml) - with PostgreSQL, Redis and multiple Moodle containers, using NGINX as load balancer
+  * refer to https://docs.moodle.org/en/Caching for setting up after login
+  * or set the `SESSION_CACHE_*` environment variables 
 
 ## Configuration
 Define the ENV variables in docker-compose.yml file
