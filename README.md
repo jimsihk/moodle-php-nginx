@@ -66,8 +66,8 @@ docker compose --file docker-compose-replica.yml up
 Login on the system using the provided credentials (ENV vars)
 
 #### Sample docker-compose files
-* [docker-compose.yaml](docker-compose.yaml) - with PostgreSQL
-* [docker-compose-replica.yaml](docker-compose.replica.yaml) - with PostgreSQL, Redis and multiple Moodle containers, using NGINX as load balancer
+* [docker-compose.yml](docker-compose.yml) - with PostgreSQL
+* [docker-compose-replica.yml](docker-compose.replica.yml) - with PostgreSQL, Redis and multiple Moodle containers, using NGINX as load balancer
   * refer to https://docs.moodle.org/en/Caching for setting up after login
   * or set the `SESSION_CACHE_*` environment variables 
 
