@@ -3,7 +3,7 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/jimsihk/alpine-moodle.svg)](https://hub.docker.com/r/jimsihk/alpine-moodle/)
 ![Docker Image Size](https://img.shields.io/docker/image-size/jimsihk/alpine-moodle)
 ![nginx 1.24](https://img.shields.io/badge/nginx-1.24-brightgreen.svg)
-![php 8.1](https://img.shields.io/badge/php-8.1-brightgreen.svg)
+![php 8.2](https://img.shields.io/badge/php-8.2-brightgreen.svg)
 ![moodle-4.2](https://img.shields.io/badge/moodle-4.2-yellow)
 ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 
