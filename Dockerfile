@@ -1,17 +1,17 @@
 ARG ARCH=quay.io/
-FROM ${ARCH}jimsihk/alpine-php-nginx:82.13.2
+FROM ${ARCH}jimsihk/alpine-php-nginx:82.13.3
 
 LABEL Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux." \
       Maintainer="99048231+jimsihk@users.noreply.github.com"
 
-# renovate: datasource=repology depName=alpine_3_18/dcron versioning=loose
+# renovate: datasource=repology depName=alpine_3_19/dcron versioning=loose
 ARG DCRON_VERSION="=4.5-r9"
-# renovate: datasource=repology depName=alpine_3_18/libcap versioning=loose
-ARG LIBCAP_VERSION="=2.69-r0"
-# renovate: datasource=repology depName=alpine_3_18/git versioning=loose
-ARG GIT_VERSION="=2.40.1-r0"
-# renovate: datasource=repology depName=alpine_3_18/bash versioning=loose
-ARG BASH_VERSION="=5.2.15-r5"
+# renovate: datasource=repology depName=alpine_3_19/libcap versioning=loose
+ARG LIBCAP_VERSION="=2.69-r1"
+# renovate: datasource=repology depName=alpine_3_19/git versioning=loose
+ARG GIT_VERSION="=2.43.0-r0"
+# renovate: datasource=repology depName=alpine_3_19/bash versioning=loose
+ARG BASH_VERSION="=5.2.21-r0"
 
 ARG ARG_WEB_PATH='/var/www/html'
 ENV WEB_PATH=${ARG_WEB_PATH}
@@ -35,9 +35,9 @@ USER nobody
 
 # Change MOODLE_XX_STABLE for new versions
 ARG ARG_MOODLE_GIT_URL='https://github.com/moodle/moodle.git'
-ARG ARG_MODOLE_GIT_BRANCH='MOODLE_402_STABLE'
-# renovate: datasource=git-refs depName=https://github.com/moodle/moodle branch=MOODLE_402_STABLE
-ARG ARG_MODOLE_GIT_COMMIT='86a0b8765869f547e14d7ecd35dbbee6307c91cf'
+ARG ARG_MODOLE_GIT_BRANCH='MOODLE_403_STABLE'
+# renovate: datasource=git-refs depName=https://github.com/moodle/moodle branch=MOODLE_403_STABLE
+ARG ARG_MODOLE_GIT_COMMIT='fe8d759b1759c2dfbdc9cf27c8224c4e6746bf05'
 ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     MODOLE_GIT_BRANCH=${ARG_MODOLE_GIT_BRANCH} \
     MOODLE_GIT_COMMIT=${ARG_MODOLE_GIT_COMMIT} \
