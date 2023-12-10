@@ -25,7 +25,7 @@ services:
     environment:
       - LANG=en_US.UTF-8
       - LANGUAGE=en_US:en
-      - SITE_URL=http://localhost
+      - SITE_URL=https://localhost
       - DB_TYPE=pgsql
       - DB_HOST=postgres
       - DB_PORT=5432
@@ -33,7 +33,7 @@ services:
       - DB_USER=moodle
       - DB_PASS=moodle
       - DB_PREFIX=mdl_
-      - SSLPROXY=false
+      - SSLPROXY=true
       - MOODLE_EMAIL=user@example.com
       - MOODLE_LANGUAGE=en
       - MOODLE_SITENAME=New-Site
@@ -68,8 +68,11 @@ services:
     image: nginx
     volumes:
       - ./nginx-lb.conf:/etc/nginx/nginx.conf:ro
+      - ./https.crt:/etc/nginx/ssl/default.crt:ro
+      - ./https.key:/etc/nginx/ssl/default.key:ro
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - moodle
 
