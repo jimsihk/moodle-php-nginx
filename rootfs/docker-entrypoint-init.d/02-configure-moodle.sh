@@ -232,9 +232,11 @@ if [ -z "$AUTO_UPDATE_MOODLE" ] || [ "$AUTO_UPDATE_MOODLE" = true ]; then
   fi
   echo "Upgrading moodle..."
   php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/maintenance.php --enable
-  if [ -z "$UPDATE_MOODLE_CODE" ] || [ "$UPDATE_MOODLE_CODE" = true ]; then
-    echo "Checking moodle code version..."
-    git -C "${WEB_PATH}" fetch origin "$MODOLE_GIT_BRANCH" --depth=1 && git -C "${WEB_PATH}" checkout FETCH_HEAD -B "$MODOLE_GIT_BRANCH"
+  if [ "${ENABLE_GIT_CLONE}" = 'true' ]; then
+    if [ -z "$UPDATE_MOODLE_CODE" ] || [ "$UPDATE_MOODLE_CODE" = true ]; then
+      echo "Checking moodle code version..."
+      git -C "${WEB_PATH}" fetch origin "$MODOLE_GIT_BRANCH" --depth=1 && git -C "${WEB_PATH}" checkout FETCH_HEAD -B "$MODOLE_GIT_BRANCH"
+    fi
   fi
   php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/upgrade.php --non-interactive --allow-unstable
   if [ $START_IN_MAINT_MODE = false ]; then

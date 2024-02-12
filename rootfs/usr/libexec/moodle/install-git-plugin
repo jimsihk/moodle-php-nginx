@@ -3,7 +3,7 @@
 # Install Moodle plugin from Git
 # Description: The script will take the inputted Git repo to install 
 #              to Moodle core
-# Parameters: $1: Git repo URL, e.g. https://github.com/catalyst/moodle-cachestore_redissentinel.gi
+# Parameters: $1: Git repo URL, e.g. https://github.com/catalyst/moodle-cachestore_redissentinel.git
 #             $2: Git branch, e.g. master
 #             $3: Git commit hash, e.g. b495e8f36a81fd1a2a414e34a978da879c473f31
 #             $4: Moodle plugin absolute path, e.g. /var/www/html/cache/stores/redissentinel/

@@ -2,7 +2,7 @@
 #
 # Clone Git Repository with Minimal Commit History
 # Description: The script will take the inputted Git repo to clone the repo with least commit history
-# Parameters: $1: Git repo URL, e.g. https://github.com/catalyst/moodle-cachestore_redissentinel.gi
+# Parameters: $1: Git repo URL, e.g. https://github.com/catalyst/moodle-cachestore_redissentinel.git
 #             $2: Git branch, e.g. master
 #             $3: Git commit hash, e.g. b495e8f36a81fd1a2a414e34a978da879c473f31
 #             $4: Moodle plugin absolute path, e.g. /var/www/html/cache/stores/redissentinel/
@@ -14,24 +14,37 @@ then
   INPUT_GIT_BRANCH="$2"
   INPUT_GIT_COMMIT="$3"
   DOWNLOAD_PATH="$4"
-  echo "Clone from git repo: ${INPUT_GIT_URL}..."
-  git clone "${INPUT_GIT_URL}" --branch "${INPUT_GIT_BRANCH}" --single-branch --depth 1 "${DOWNLOAD_PATH}"/
-  # Make sure the current HEAD is the defined commit
-  for FETCH_DEPTH in 1 5 10 30 50 100 200
-  do
-    if [ $FETCH_DEPTH -gt 1 ]
+  
+  if [ "${ENABLE_GIT_CLONE}" = 'true' ]
+  then
+    echo "Clone from git repo: ${INPUT_GIT_URL} to ${DOWNLOAD_PATH}..."
+    git clone "${INPUT_GIT_URL}" --branch "${INPUT_GIT_BRANCH}" --single-branch --depth 1 "${DOWNLOAD_PATH}"/
+    # Make sure the current HEAD is the defined commit
+    for FETCH_DEPTH in 1 5 10 30 50 100 200
+    do
+      if [ $FETCH_DEPTH -gt 1 ]
+      then
+        echo "Attempting to fetch last $FETCH_DEPTH commits..."
+        git -C "${DOWNLOAD_PATH}" fetch origin "${INPUT_GIT_BRANCH}" --depth "${FETCH_DEPTH}"
+      fi
+      git -C "${DOWNLOAD_PATH}" reset --hard "${INPUT_GIT_COMMIT}"
+      RESULT=$?
+      if [ $RESULT -eq 0 ]
+      then
+        break;
+      fi
+    done
+    git -C "${DOWNLOAD_PATH}" clean -dfx
+  else
+    if [ ! -d "${DOWNLOAD_PATH}" ]
     then
-      echo "Attempting to fetch last $FETCH_DEPTH commits..."
-      git -C "${DOWNLOAD_PATH}" fetch origin "${INPUT_GIT_BRANCH}" --depth "${FETCH_DEPTH}"
+      mkdir -p "${DOWNLOAD_PATH}"
     fi
-    git -C "${DOWNLOAD_PATH}" reset --hard "${INPUT_GIT_COMMIT}"
-    RESULT=$?
-    if [ $RESULT -eq 0 ]
-    then
-      break;
-    fi
-  done
-  git -C "${DOWNLOAD_PATH}" clean -dfx
+    # e.g. https://github.com/catalyst/moodle-cachestore_redissentinel/archive/b495e8f36a81fd1a2a414e34a978da879c473f31.tar.gz
+    DOWNLOAD_URL=$(echo "${INPUT_GIT_URL}" | sed 's/\.git$//')'/archive/'"${INPUT_GIT_COMMIT}"'.tar.gz'
+    echo "Download from git repo: ${DOWNLOAD_URL} to ${DOWNLOAD_PATH}..."
+    curl --location "${DOWNLOAD_URL}" | tar xz --strip-components=1 -C "${DOWNLOAD_PATH}"/
+  fi
 else
   echo "Missing argument: <repo> <branch> <commit_hash> <local_path>"
   exit 1

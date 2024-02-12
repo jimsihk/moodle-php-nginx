@@ -16,6 +16,10 @@ ARG BASH_VERSION="=5.2.21-r0"
 ARG ARG_WEB_PATH='/var/www/html'
 ENV WEB_PATH=${ARG_WEB_PATH}
 
+# controls whether the remaining steps should use git clone or simply download from git repo
+ARG ARG_ENABLE_GIT_CLONE='true'
+ENV ENABLE_GIT_CLONE=${ARG_ENABLE_GIT_CLONE}
+
 USER root
 COPY --chown=nobody rootfs/ /
 
@@ -24,8 +28,8 @@ COPY --chown=nobody rootfs/ /
 RUN apk add --no-cache \
         dcron${DCRON_VERSION} \
         libcap${LIBCAP_VERSION} \
-        git${GIT_VERSION} \
         bash${BASH_VERSION} \
+    && if [ "${ENABLE_GIT_CLONE}" = 'true' ]; then apk add --no-cache git${GIT_VERSION}; fi \
     && chown nobody:nobody /usr/sbin/crond \
     && setcap cap_setgid=ep /usr/sbin/crond \
     # Clean up unused files from base image
@@ -62,7 +66,7 @@ ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     SMTP_HOST=smtp.gmail.com \
     SMTP_PORT=587 \
     SMTP_USER=your_email@gmail.com \
-    SMTP_PASSWORD=your_password  \
+    SMTP_PASSWORD=your_password \
     SMTP_PROTOCOL=tls \
     MOODLE_MAIL_NOREPLY_ADDRESS=noreply@localhost \
     MOODLE_MAIL_PREFIX=[moodle] \

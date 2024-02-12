@@ -30,17 +30,21 @@ jobs:
 
           VERSION=${GITHUB_REF#refs/*/}
           TAGS="${{ env.IMAGE_NAME }}:${VERSION}"
+          TAGS_SLIM="${{ env.IMAGE_NAME }}:${VERSION}-slim"
 
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             TAGS="$TAGS,${{ env.IMAGE_NAME }}:latest"
+            TAGS_SLIM="$TAGS_SLIM,${{ env.IMAGE_NAME }}:latest-slim"
           fi
           
           for TAG in $(echo $TAGS | sed 's/,/ /g'); do
             TAGS="$TAGS,quay.io/$TAG"
+            TAGS_SLIM="$TAGS_SLIM,quay.io/$TAG-slim"
           done
 
           echo "platforms=${DOCKER_PLATFORMS}" >> $GITHUB_OUTPUT
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "tags_slim=${TAGS_SLIM}" >> $GITHUB_OUTPUT
 
       - name: Set up QEMU
         id: qemu
@@ -121,3 +125,15 @@ jobs:
           tags: ${{ steps.prepare.outputs.tags }}
           platforms: ${{ steps.prepare.outputs.platforms }}
           provenance: false
+
+      - name: Build and push (slim version)
+        if: steps.changed-files.outputs.any_changed == 'true'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.prepare.outputs.tags_slim }}
+          platforms: ${{ steps.prepare.outputs.platforms }}
+          provenance: false
+          build-args: |
+            ARG_ENABLE_GIT_CLONE='false'

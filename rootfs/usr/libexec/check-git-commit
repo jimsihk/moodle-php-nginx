@@ -9,18 +9,24 @@ if [ -n "$1" ] || [ -n "$2" ]
 then
   if [ -d "$1" ]
   then
-    CODE_PATH="$1"
-    CURRENT_COMMIT=$(git -C "$CODE_PATH" rev-parse HEAD)
-    TARGET_COMMIT="$2"
-  
-    echo "Downloaded Git commit at $CODE_PATH: $CURRENT_COMMIT"
-  
-    if [ "$CURRENT_COMMIT" != "$TARGET_COMMIT" ]
+    if [ "${ENABLE_GIT_CLONE}" = 'true' ]
     then
-      echo "Expecting Git commit: $TARGET_COMMIT, mismatch"
-      exit 1
+      CODE_PATH="$1"
+      CURRENT_COMMIT=$(git -C "$CODE_PATH" rev-parse HEAD)
+      TARGET_COMMIT="$2"
+    
+      echo "Downloaded Git commit at $CODE_PATH: $CURRENT_COMMIT"
+    
+      if [ "$CURRENT_COMMIT" != "$TARGET_COMMIT" ]
+      then
+        echo "Expecting Git commit: $TARGET_COMMIT, mismatch"
+        exit 1
+      else
+        echo "Git commit matched"
+        exit 0
+      fi
     else
-      echo "Git commit matched"
+      echo "Skipped checking git commit, git clone is not enabled"
       exit 0
     fi
   else
