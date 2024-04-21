@@ -1,5 +1,5 @@
 ARG ARCH=quay.io/
-FROM ${ARCH}jimsihk/alpine-php-nginx:82.18.0
+FROM ${ARCH}jimsihk/alpine-php-nginx:83.6.0
 
 LABEL Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux." \
       Maintainer="99048231+jimsihk@users.noreply.github.com"
@@ -33,15 +33,16 @@ RUN apk add --no-cache \
     && chown nobody:nobody /usr/sbin/crond \
     && setcap cap_setgid=ep /usr/sbin/crond \
     # Clean up unused files from base image
-    && rm ${WEB_PATH}/index.php ${WEB_PATH}/test.html
+    && if [ -f "${WEB_PATH}/index.php" ]; then rm ${WEB_PATH}/index.php; fi \
+    && if [ -f "${WEB_PATH}/test.html" ]; then rm ${WEB_PATH}/test.html; fi
 
 USER nobody
 
 # Change MOODLE_XX_STABLE for new versions
 ARG ARG_MOODLE_GIT_URL='https://github.com/moodle/moodle.git'
-ARG ARG_MODOLE_GIT_BRANCH='MOODLE_403_STABLE'
-# renovate: datasource=git-refs depName=https://github.com/moodle/moodle branch=MOODLE_403_STABLE
-ARG ARG_MODOLE_GIT_COMMIT='143c2cd5bef1268751d58bbfc6c66c1d93cb9797'
+ARG ARG_MODOLE_GIT_BRANCH='MOODLE_404_STABLE'
+# renovate: datasource=git-refs depName=https://github.com/moodle/moodle branch=MOODLE_404_STABLE
+ARG ARG_MODOLE_GIT_COMMIT='ee91c6536f99e1633e2245780c4fe7f47340ed66'
 ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     MODOLE_GIT_BRANCH=${ARG_MODOLE_GIT_BRANCH} \
     MOODLE_GIT_COMMIT=${ARG_MODOLE_GIT_COMMIT} \

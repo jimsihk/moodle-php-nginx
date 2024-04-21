@@ -3,8 +3,8 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/jimsihk/alpine-moodle.svg)](https://hub.docker.com/r/jimsihk/alpine-moodle/)
 ![Docker Image Size](https://img.shields.io/docker/image-size/jimsihk/alpine-moodle)
 ![nginx 1.24](https://img.shields.io/badge/nginx-1.24-brightgreen.svg)
-![php 8.2](https://img.shields.io/badge/php-8.2-brightgreen.svg)
-![moodle-4.3](https://img.shields.io/badge/moodle-4.3-yellow)
+![php 8.3](https://img.shields.io/badge/php-8.3-brightgreen.svg)
+![moodle-4.4](https://img.shields.io/badge/moodle-4.4-yellow)
 ![License MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 
 Moodle setup with high availability (HA) capabilities for Docker, build on [Alpine Linux](http://www.alpinelinux.org/).
@@ -13,7 +13,7 @@ Repository: https://github.com/jimsihk/alpine-moodle
 
 * Based on official Moodle source https://github.com/moodle/moodle
 * Built on the lightweight image https://github.com/jimsihk/alpine-php-nginx
-* Smaller container image size (+/-150MB)
+* Smaller container image size (+/-150MB for full version, +/-90MB for slim version)
 * Supports HA installation with multiple type of cache stores (memcached, Redis) and PostgresSQL poolers like PgBouncer
 * Supports also Redis Sentinel as cache stores via plugin https://github.com/catalyst/moodle-cachestore_redissentinel
 * Pre-install Moodle plug-ins at build time with argument `ARG_MOODLE_PLUGIN_LIST`
