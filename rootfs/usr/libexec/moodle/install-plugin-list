@@ -1,4 +1,4 @@
-#! /bin/bash -eu
+#!/bin/bash -eu
 # Description: install moodle plugin(s) by component name
 # Forked from https://github.com/krestomatio/container_builder/blob/master/.ansible-ci/files/templated_contexts/moodle_php-fpm/conf/usr/libexec/moodle/install-plugin-list
 # - Corrected typo
