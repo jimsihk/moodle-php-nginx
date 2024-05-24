@@ -9,7 +9,7 @@ ARG DCRON_VERSION="=4.5-r9"
 # renovate: datasource=repology depName=alpine_3_20/libcap versioning=loose
 ARG LIBCAP_VERSION="=2.70-r0"
 # renovate: datasource=repology depName=alpine_3_20/git versioning=loose
-ARG GIT_VERSION="=2.43.4-r0"
+ARG GIT_VERSION="=2.45.1-r0"
 # renovate: datasource=repology depName=alpine_3_20/bash versioning=loose
 ARG BASH_VERSION="=5.2.26-r0"
 
