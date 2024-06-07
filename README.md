@@ -123,6 +123,7 @@ Define the ENV variables in docker-compose.yml file
 | upload_max_filesize         | 50M                  | Maximum size of an uploaded file.                                                                                                                               |
 | max_input_vars              | 5000                 | Maximum number of input variables allowed per request, set to at least 5000                                                                                     |
 | opcache_jit_buffer_size     | 64M                  | Amount of shared memory to reserve for compiled JIT code, set to 0 to disable the JIT                                                                           |
+| opcache_jit                 | 1235                 | Configure the JIT mode _(default value inherited from base image)_                                                                                              |
 | opcache_memory_consumption  | 128                  | Size of the shared memory storage used by OPcache in megabytes _(default value inherited from base image)_                                                      |
 | SESSION_CACHE_TYPE          |                      | Optionally sets shared session cache store: memcached, redis, database _(leave it blank to keep unchanged)_                                                     |
 | SESSION_CACHE_HOST          |                      | Hostname of the external cache store, required for memcached and redis                                                                                          |
