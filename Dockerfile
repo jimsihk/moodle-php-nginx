@@ -1,5 +1,5 @@
 ARG ARCH=quay.io/
-FROM ${ARCH}jimsihk/alpine-php-nginx:83.7.3
+FROM ${ARCH}jimsihk/alpine-php-nginx:83.8.1
 
 LABEL Description="Lightweight Moodle container with NGINX & PHP-FPM based on Alpine Linux." \
       Maintainer="99048231+jimsihk@users.noreply.github.com"
@@ -75,6 +75,7 @@ ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     post_max_size=50M \
     upload_max_filesize=50M \
     max_input_vars=5000 \
+    opcache_jit_buffer_size=64M \
     SESSION_CACHE_PREFIX=mdl \
     AUTO_UPDATE_MOODLE=true \
     UPGRADE_MOODLE_CODE=true \
