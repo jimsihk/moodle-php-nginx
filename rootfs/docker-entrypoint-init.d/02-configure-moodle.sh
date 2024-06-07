@@ -93,6 +93,12 @@ if [ ! -f "${WEB_PATH}"/config.php ]; then
     fi
     #'readonly' => [ 'instance' => ['dbhost' => 'slave.dbhost', 'dbport' => '', 'dbuser' => '', 'dbpass' => '']]
 
+    # Offload the file serving from PHP process
+    # shellcheck disable=SC2016
+    sed -i '/require_once/i $CFG->xsendfile = '\''X-Accel-Redirect'\'';' "${WEB_PATH}"/config.php
+    # shellcheck disable=SC2016
+    sed -i '/require_once/i $CFG->xsendfilealiases = array('\''\/dataroot\/'\'' => $CFG->dataroot);' "${WEB_PATH}"/config.php
+
     if [ "$SSLPROXY" = 'true' ]; then
         # shellcheck disable=SC2016
         sed -i '/require_once/i $CFG->sslproxy = true;' "${WEB_PATH}"/config.php
