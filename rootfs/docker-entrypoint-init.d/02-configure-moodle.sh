@@ -97,7 +97,29 @@ if [ ! -f "${WEB_PATH}"/config.php ]; then
     # shellcheck disable=SC2016
     sed -i '/require_once/i $CFG->xsendfile = '\''X-Accel-Redirect'\'';' "${WEB_PATH}"/config.php
     # shellcheck disable=SC2016
-    sed -i '/require_once/i $CFG->xsendfilealiases = array('\''\/dataroot\/'\'' => $CFG->dataroot);' "${WEB_PATH}"/config.php
+    sed -i '/require_once/i $CFG->xsendfilealiases = array(' "${WEB_PATH}"/config.php
+    # shellcheck disable=SC2016
+    sed -i "/\$CFG->xsendfilealiases/a );" "${WEB_PATH}"/config.php
+    # shellcheck disable=SC2016
+    sed -i "/\$CFG->xsendfilealiases/a \ \ "\''/dataroot/'\'" => \$CFG->dataroot," "${WEB_PATH}"/config.php
+    
+    if [ -n "$LOCAL_CACHE_DIRECTORY" ]; then
+      if [ ! -d "$LOCAL_CACHE_DIRECTORY" ]; then
+        echo "Creating $LOCAL_CACHE_DIRECTORY for localcachedir..."
+        mkdir -p "$LOCAL_CACHE_DIRECTORY"
+      fi
+      # shellcheck disable=SC2016
+      sed -i "/require_once/i \$CFG->localcachedir = \'$LOCAL_CACHE_DIRECTORY\';" "${WEB_PATH}"/config.php
+      # shellcheck disable=SC2016
+      sed -i "/\$CFG->xsendfilealiases/a \ \ "\''/localcachedir/'\'" => \'$LOCAL_CACHE_DIRECTORY\'," "${WEB_PATH}"/config.php
+      cat << EOL >> /etc/nginx/conf.d/default/server/moodle.conf
+    location ~ ^/localcachedir/(.*)$ {
+        internal;
+        alias $LOCAL_CACHE_DIRECTORY/\$1;
+    }
+EOL
+      echo "Set $LOCAL_CACHE_DIRECTORY as localcachedir"
+    fi
 
     if [ "$SSLPROXY" = 'true' ]; then
         # shellcheck disable=SC2016
