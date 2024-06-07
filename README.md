@@ -117,10 +117,13 @@ Define the ENV variables in docker-compose.yml file
 | SMTP_PROTOCOL               | tls                  |                                                                                                                                                                 |
 | MOODLE_MAIL_NOREPLY_ADDRESS | noreply@localhost    |                                                                                                                                                                 |
 | MOODLE_MAIL_PREFIX          | [moodle]             |                                                                                                                                                                 |
-| client_max_body_size        | 50M                  |                                                                                                                                                                 |
-| post_max_size               | 50M                  |                                                                                                                                                                 |
-| upload_max_filesize         | 50M                  |                                                                                                                                                                 |
-| max_input_vars              | 5000                 |                                                                                                                                                                 |
+| memory_limit                | 128M                 | Maximum amount of memory that a PHP script is allowed to allocate _(default value inherited from base image)_                                                   |
+| client_max_body_size        | 50M                  | Sets the maximum allowed size of the client request body, specified in the “Content-Length” request header field                                                |
+| post_max_size               | 50M                  | Max size of post data allowed. This setting also affects file upload. To upload large files, this value must be larger than upload_max_filesize                 |
+| upload_max_filesize         | 50M                  | Maximum size of an uploaded file.                                                                                                                               |
+| max_input_vars              | 5000                 | Maximum number of input variables allowed per request, set to at least 5000                                                                                     |
+| opcache_jit_buffer_size     | 64M                  | Amount of shared memory to reserve for compiled JIT code, set to 0 to disable the JIT                                                                           |
+| opcache_memory_consumption  | 128                  | Size of the shared memory storage used by OPcache in megabytes _(default value inherited from base image)_                                                      |
 | SESSION_CACHE_TYPE          |                      | Optionally sets shared session cache store: memcached, redis, database _(leave it blank to keep unchanged)_                                                     |
 | SESSION_CACHE_HOST          |                      | Hostname of the external cache store, required for memcached and redis                                                                                          |
 | SESSION_CACHE_PORT          |                      | Memcached=11211, Redis=6379, required for memcached and redis                                                                                                   |
@@ -131,6 +134,8 @@ Define the ENV variables in docker-compose.yml file
 | DISABLE_WEB_INSTALL_PLUGIN  | false                | Set to true to disable plugin installation via site admin UI, could be useful to avoid image outsync with HA setting                                            |
 | MAINT_STATUS_KEYWORD        | Status: enabled      | Keyword for detecting Moodle maintenance status when running admin/cli/maintenance.php, language following the Moodle site default language                     |
 | LOCAL_CACHE_DIRECTORY       |                      | Set the path to a local fast filesystem for Moodle local caching that no need to be shared with other instances                                                 |
+
+_More settings on PHP and NGINX can refer to the base image https://github.com/jimsihk/alpine-php-nginx/blob/dev/README.md_
 
 ### Important Note about using `AUTO_UPDATE_MOODLE` and `UPDATE_MOODLE_CODE`
 
@@ -197,9 +202,6 @@ ENV MOODLE_PLUGIN_LIST=${ARG_MOODLE_PLUGIN_LIST}
 ENV ALLOW_INCOMPATIBLE_PLUGIN=${ARG_ALLOW_INCOMPATIBLE_PLUGIN}
 RUN /usr/libexec/moodle/download-moodle-plugin
 ```
-
-### Base Image
-Refer to https://github.com/jimsihk/alpine-php-nginx/blob/dev/README.md
 
 ## Known Issues
 #### <del>Unable to Create/Update Moodle Roles with "Incorrect role short name" (https://github.com/erseco/alpine-moodle/issues/26)</del>
