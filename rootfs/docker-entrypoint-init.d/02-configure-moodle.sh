@@ -15,7 +15,8 @@ cfg_cmd="$php_cmd $cfg_file" #TODO: replacing: php -d max_input_vars=10000 "$cfg
 
 # Function to update or add a configuration value
 update_or_add_config_value() {
-    local key="$1"  # The configuration key (e.g., $CFG->wwwroot)
+    # Escape special characters when pass to grep
+    local key=$(echo "$1" | sed 's|\[|\\[|g' | sed 's|\]|\\]|g')  # The configuration key (e.g., $CFG->wwwroot)
     local value="$2"  # The new value for the configuration key
 
     if [ -z "$value" ]; then
@@ -31,11 +32,8 @@ update_or_add_config_value() {
         # Other values get single-quoted
         quote="'"
     fi
-    
-    # Escape special characters when pass to grep
-    search_key=$(echo $key | sed 's|\[|\\[|g' | sed 's|\]|\\]|g')
 
-    if grep -q "search_key" "$config_file"; then
+    if grep -q "key" "$config_file"; then
         # If the key exists, replace its value
         sed -i "s|\($key\s*=\s*\)[^;]*;|\1$quote$value$quote;|g" "$config_file"
     else
