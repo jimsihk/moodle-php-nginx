@@ -35,7 +35,6 @@ update_or_add_config_value() {
     if grep -q "$key" "$config_file"; then
         # If the key exists, replace its value
         sed -i "s|\($key\s*=\s*\)[^;]*;|\1$quote$value$quote;|g" "$config_file"
-
     else
         # If the key does not exist, add it before "require_once"
         sed -i "/require_once/i $key\t= $quote$value$quote;" "$config_file"
@@ -55,6 +54,8 @@ check_db_availability() {
         echo -n '.'
         sleep 1
     done
+    echo ""
+    echo ""
     echo "Great, $db_host is ready!"
 }
 
@@ -123,7 +124,6 @@ upgrade_config_file() {
     update_or_add_config_value "\$CFG->dbname" "$DB_NAME"
     update_or_add_config_value "\$CFG->dbuser" "$DB_USER"
     update_or_add_config_value "\$CFG->dbpass" "$DB_PASS"
-    update_or_add_config_value "\$CFG->dbport" "$DB_PORT"
     update_or_add_config_value "\$CFG->prefix" "$DB_PREFIX"
     update_or_add_config_value "\$CFG->reverseproxy" "$REVERSEPROXY"
     update_or_add_config_value "\$CFG->sslproxy" "$SSLPROXY"
@@ -170,7 +170,7 @@ configure_moodle_settings() {
 final_configurations() {
     echo "Performing final setup..."
     # Avoid writing the config file
-    chmod 444 "$config_file"
+    chmod 440 "$config_file"
 
     # Fix publicpaths check to point to the internal container on port 8080
     sed -i 's/wwwroot/wwwroot\ \. \"\:8080\"/g' lib/classes/check/environment/publicpaths.php
@@ -327,8 +327,6 @@ fi
 
 # Upgrade config.php file
 upgrade_config_file
-config_session_cache
-config_file_serving
 
 # Check if the database is already installed
 if php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/isinstalled.php ; then
@@ -337,6 +335,8 @@ fi
 
 # Post installation configurations
 configure_moodle_settings
+config_session_cache
+config_file_serving
 
 # Upgrade moodle if needed
 if [ -z "$AUTO_UPDATE_MOODLE" ] || [ "$AUTO_UPDATE_MOODLE" = true ]; then
