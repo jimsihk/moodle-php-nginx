@@ -33,7 +33,7 @@ update_or_add_config_value() {
         quote="'"
     fi
 
-    if grep -q "key" "$config_file"; then
+    if grep -q "$key" "$config_file"; then
         # If the key exists, replace its value
         sed -i "s|\($key\s*=\s*\)[^;]*;|\1$quote$value$quote;|g" "$config_file"
     else
