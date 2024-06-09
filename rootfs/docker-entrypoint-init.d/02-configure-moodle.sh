@@ -17,6 +17,7 @@ cfg_cmd="$php_cmd $cfg_file" #TODO: replacing: php -d max_input_vars=10000 "$cfg
 update_or_add_config_value() {
     local key=$(echo "$1" | sed 's|\[|\\[|g' | sed 's|\]|\\]|g' | sed 's|\/|\\/|g')  # The configuration key (e.g., $CFG->wwwroot), need to escape special characters for grep and sed
     local value="$2"  # The new value for the configuration key
+    local noquote="$3" # Avoid adding quote
 
     if [ -z "$value" ]; then
         # If value is empty, remove the line with the key if it exists
@@ -24,7 +25,7 @@ update_or_add_config_value() {
         return
     fi
 
-    if [ "$value" = 'true' ] || [ "$value" = 'false' ]; then
+    if [ "$value" = 'true' ] || [ "$value" = 'false' ] || [ -n "$noquote" ]; then
         # Handle boolean values without quotes
         quote=''
     else
@@ -129,7 +130,7 @@ upgrade_config_file() {
     # Avoid cron failure by forcing to use database as lock factory
     # https://moodle.org/mod/forum/discuss.php?d=328300#p1320902
     # shellcheck disable=SC2016
-    update_or_add_config_value "\$CFG->lock_factory" "\\\\core\\\\lock\\\\db_record_lock_factory"
+    update_or_add_config_value "\$CFG->lock_factory" "\\\\core\\\\lock\\\\db_record_lock_factory" #TODO: fix missing "\"s, need 2
 }
 
 # Function to configure Moodle settings via CLI
@@ -279,7 +280,7 @@ config_file_serving() {
     echo "Configuring file serving..."
     # Offload the file serving from PHP process
     update_or_add_config_value "\$CFG->xsendfile" "X-Accel-Redirect"
-    update_or_add_config_value "\$CFG->xsendfilealiases['/dataroot/']" "\$CFG->dataroot"
+    update_or_add_config_value "\$CFG->xsendfilealiases['/dataroot/']" "\$CFG->dataroot" "noquote"
     
     if [ -n "$LOCAL_CACHE_DIRECTORY" ]; then
         if [ ! -d "$LOCAL_CACHE_DIRECTORY" ]; then
