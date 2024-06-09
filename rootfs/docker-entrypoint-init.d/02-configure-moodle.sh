@@ -7,7 +7,7 @@ set -eo pipefail
 config_file="${WEB_PATH}"/config.php
 cfg_file="${WEB_PATH}"/admin/cli/cfg.php
 php_cmd="php -d max_input_vars=10000" #TODO
-cfg_cmd="$php_cmd $cfg_file" #TODO: replacing: php -d max_input_vars=10000 "$cfg_file"
+cfg_cmd="$php_cmd $cfg_file" #TODO: replacing: "$php_cmd" "$cfg_file"
 
 #
 # Available functions
@@ -15,9 +15,12 @@ cfg_cmd="$php_cmd $cfg_file" #TODO: replacing: php -d max_input_vars=10000 "$cfg
 
 # Function to update or add a configuration value
 update_or_add_config_value() {
-    local key=$(echo "$1" | sed 's|\[|\\[|g' | sed 's|\]|\\]|g' | sed 's|\/|\\/|g')  # The configuration key (e.g., $CFG->wwwroot), need to escape special characters for grep and sed
-    local value="$2"  # The new value for the configuration key
-    local noquote="$3" # Avoid adding quote
+    local key
+    key=$(echo "$1" | sed 's|\[|\\[|g' | sed 's|\]|\\]|g' | sed 's|\/|\\/|g')  # The configuration key (e.g., $CFG->wwwroot), need to escape special characters for grep and sed
+    local value
+    value="$2"  # The new value for the configuration key
+    local noquote
+    noquote="$3" # Avoid adding quote
 
     if [ -z "$value" ]; then
         # If value is empty, remove the line with the key if it exists
@@ -36,7 +39,7 @@ update_or_add_config_value() {
 
     if grep -q "$key" "$config_file"; then
         # If the key exists, replace its value
-        echo "Updated $key in config.php"
+        echo "Updated $key in config.php" #TODO: do not update if no change
         sed -i "s|\($key\s*=\s*\)[^;]*;|\1$quote$value$quote;|g" "$config_file"
     else
         # If the key does not exist, add it before "require_once"
@@ -63,7 +66,7 @@ check_db_availability() {
 # Function to generate config.php file
 generate_config_file() {
     echo "Generating config.php file..."
-    ENV_VAR='var' php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/install.php \
+    ENV_VAR='var' "$php_cmd" "${WEB_PATH}"/admin/cli/install.php \
         --lang="$MOODLE_LANGUAGE" \
         --wwwroot="$SITE_URL" \
         --dataroot="/var/www/moodledata/" \
@@ -88,13 +91,13 @@ generate_config_file() {
 # Function to install the database
 install_database() {
     echo "Installing database..."
-    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/install_database.php \
-        --lang=$MOODLE_LANGUAGE \
-        --adminuser=$MOODLE_USERNAME \
-        --adminpass=$MOODLE_PASSWORD \
-        --adminemail=$MOODLE_EMAIL \
-        --fullname=$MOODLE_SITENAME \
-        --shortname=moodle \
+    "$php_cmd" "${WEB_PATH}"/admin/cli/install_database.php \
+        --lang="$MOODLE_LANGUAGE" \
+        --adminuser="$MOODLE_USERNAME" \
+        --adminpass="$MOODLE_PASSWORD" \
+        --adminemail="$MOODLE_EMAIL" \
+        --fullname="$MOODLE_SITENAME" \
+        --shortname="$MOODLE_SHORTNAME" \
         --agree-license
 }
 
@@ -139,20 +142,20 @@ upgrade_config_file() {
 # Function to configure Moodle settings via CLI
 configure_moodle_settings() {
     echo "Configuring settings..."
-    php -d max_input_vars=10000 "$cfg_file" --name=pathtophp --set=/usr/bin/php
-    php -d max_input_vars=10000 "$cfg_file" --name=pathtodu --set=/usr/bin/du
-    php -d max_input_vars=10000 "$cfg_file" --name=enableblogs --set=0
-    php -d max_input_vars=10000 "$cfg_file" --name=smtphosts --set="$SMTP_HOST:$SMTP_PORT"
-    php -d max_input_vars=10000 "$cfg_file" --name=smtpuser --set="$SMTP_USER"
-    php -d max_input_vars=10000 "$cfg_file" --name=smtppass --set="$SMTP_PASSWORD"
-    php -d max_input_vars=10000 "$cfg_file" --name=smtpsecure --set="$SMTP_PROTOCOL"
-    php -d max_input_vars=10000 "$cfg_file" --name=noreplyaddress --set="$MOODLE_MAIL_NOREPLY_ADDRESS"
-    php -d max_input_vars=10000 "$cfg_file" --name=emailsubjectprefix --set="$MOODLE_MAIL_PREFIX"
+    "$cfg_cmd" --name=pathtophp --set=/usr/bin/php
+    "$cfg_cmd" --name=pathtodu --set=/usr/bin/du
+    "$cfg_cmd" --name=enableblogs --set=0
+    "$cfg_cmd" --name=smtphosts --set="$SMTP_HOST:$SMTP_PORT"
+    "$cfg_cmd" --name=smtpuser --set="$SMTP_USER"
+    "$cfg_cmd" --name=smtppass --set="$SMTP_PASSWORD"
+    "$cfg_cmd" --name=smtpsecure --set="$SMTP_PROTOCOL"
+    "$cfg_cmd" --name=noreplyaddress --set="$MOODLE_MAIL_NOREPLY_ADDRESS"
+    "$cfg_cmd" --name=emailsubjectprefix --set="$MOODLE_MAIL_PREFIX"
 
     if [ "$DISABLE_WEB_INSTALL_PLUGIN" = 'true' ]; then
-        php -d max_input_vars=10000 "$cfg_file" --name=disableupdateautodeploy --set=1
+        "$cfg_cmd" --name=disableupdateautodeploy --set=1
     else
-        php -d max_input_vars=10000 "$cfg_file" --name=disableupdateautodeploy --set=0
+        "$cfg_cmd" --name=disableupdateautodeploy --set=0
     fi
 
     # Check if DEBUG is set to true
@@ -184,22 +187,22 @@ upgrade_moodle() {
     # in order to avoid interruption to users while moodle restart
     echo "Checking maintenance status..."
     START_IN_MAINT_MODE=false
-    MAINT_STATUS=$(php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/maintenance.php | sed 's/^==.*==//g' | sed '/^$/d')
+    MAINT_STATUS=$("$php_cmd" "${WEB_PATH}"/admin/cli/maintenance.php | sed 's/^==.*==//g' | sed '/^$/d')
     if [ "$MAINT_STATUS" = "$MAINT_STATUS_KEYWORD" ]; then
         echo "Maintenance mode will be kept enabled"
         START_IN_MAINT_MODE=true
     fi
     echo "Upgrading moodle..."
-    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/maintenance.php --enable
+    "$php_cmd" "${WEB_PATH}"/admin/cli/maintenance.php --enable
     if [ "${ENABLE_GIT_CLONE}" = 'true' ]; then
         if [ -z "$UPDATE_MOODLE_CODE" ] || [ "$UPDATE_MOODLE_CODE" = true ]; then
             echo "Checking moodle code version..."
             git -C "${WEB_PATH}" fetch origin "$MODOLE_GIT_BRANCH" --depth=1 && git -C "${WEB_PATH}" checkout FETCH_HEAD -B "$MODOLE_GIT_BRANCH"
         fi
     fi
-    php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/upgrade.php --non-interactive --allow-unstable
+    "$php_cmd" "${WEB_PATH}"/admin/cli/upgrade.php --non-interactive --allow-unstable
     if [ $START_IN_MAINT_MODE = false ]; then
-        php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/maintenance.php --disable
+        "$php_cmd" "${WEB_PATH}"/admin/cli/maintenance.php --disable
     else
         echo "Started in maintenance mode, requires manual disable the maintenance mode"
     fi
@@ -240,11 +243,11 @@ config_session_cache() {
                 # Give it another 3 seconds.
                 sleep 3;
                 if [ -n "$SESSION_CACHE_HOST" ] && [ -n "$SESSION_CACHE_PORT" ] ; then
-                    php -d max_input_vars=10000 "$cfg_file" --name=session_handler_class --set='\core\session\memcached'
-                    php -d max_input_vars=10000 "$cfg_file" --name=session_memcached_save_path --set="$SESSION_CACHE_HOST:$SESSION_CACHE_PORT"
-                    php -d max_input_vars=10000 "$cfg_file" --name=session_memcached_prefix --set="$SESSION_CACHE_PREFIX.memc.sess.key."
-                    php -d max_input_vars=10000 "$cfg_file" --name=session_memcached_acquire_lock_timeout --set=120
-                    php -d max_input_vars=10000 "$cfg_file" --name=session_memcached_lock_expire --set=7200
+                    "$cfg_cmd" --name=session_handler_class --set='\core\session\memcached'
+                    "$cfg_cmd" --name=session_memcached_save_path --set="$SESSION_CACHE_HOST:$SESSION_CACHE_PORT"
+                    "$cfg_cmd" --name=session_memcached_prefix --set="$SESSION_CACHE_PREFIX.memc.sess.key."
+                    "$cfg_cmd" --name=session_memcached_acquire_lock_timeout --set=120
+                    "$cfg_cmd" --name=session_memcached_lock_expire --set=7200
                 fi
                 ;;
             redis)
@@ -252,28 +255,28 @@ config_session_cache() {
                 echo "Waiting for $SESSION_CACHE_HOST:$SESSION_CACHE_PORT to be ready..."
                 while ! nc -w 1 "$SESSION_CACHE_HOST" "$SESSION_CACHE_PORT"; do
                     # Show some progress
-                    prinf '.';
+                    printf '.';
                     sleep 1;
                 done
                 echo "$SESSION_CACHE_HOST is ready"
                 # Give it another 3 seconds.
                 sleep 3;
                 if [ -n "$SESSION_CACHE_HOST" ] && [ -n "$SESSION_CACHE_PORT" ] ; then
-                    php -d max_input_vars=10000 "$cfg_file" --name=session_handler_class --set='\core\session\redis'
-                    php -d max_input_vars=10000 "$cfg_file" --name=session_redis_host --set="$SESSION_CACHE_HOST"
-                    php -d max_input_vars=10000 "$cfg_file" --name=session_redis_port --set="$SESSION_CACHE_PORT"
+                    "$cfg_cmd" --name=session_handler_class --set='\core\session\redis'
+                    "$cfg_cmd" --name=session_redis_host --set="$SESSION_CACHE_HOST"
+                    "$cfg_cmd" --name=session_redis_port --set="$SESSION_CACHE_PORT"
                     if [ -n "$SESSION_CACHE_AUTH" ] ; then
-                        php -d max_input_vars=10000 "$cfg_file" --name=session_redis_auth --set="$SESSION_CACHE_AUTH"
+                        "$cfg_cmd" --name=session_redis_auth --set="$SESSION_CACHE_AUTH"
                     fi
-                    php -d max_input_vars=10000 "$cfg_file" --name=session_redis_prefix --set="$SESSION_CACHE_PREFIX"
-                    php -d max_input_vars=10000 "$cfg_file" --name=session_redis_acquire_lock_timeout --set=120
-                    php -d max_input_vars=10000 "$cfg_file" --name=session_redis_lock_expire --set=7200
-                    php -d max_input_vars=10000 "$cfg_file" --name=session_redis_serializer_use_igbinary --set='true'
+                    "$cfg_cmd" --name=session_redis_prefix --set="$SESSION_CACHE_PREFIX"
+                    "$cfg_cmd" --name=session_redis_acquire_lock_timeout --set=120
+                    "$cfg_cmd" --name=session_redis_lock_expire --set=7200
+                    "$cfg_cmd" --name=session_redis_serializer_use_igbinary --set='true'
                 fi
                 ;;
             database)
-                php -d max_input_vars=10000 "$cfg_file" --name=session_handler_class --set='\core\session\database'
-                php -d max_input_vars=10000 "$cfg_file" --name=session_database_acquire_lock_timeout --set=120
+                "$cfg_cmd" --name=session_handler_class --set='\core\session\database'
+                "$cfg_cmd" --name=session_database_acquire_lock_timeout --set=120
                 ;;
         esac
     fi
@@ -330,7 +333,7 @@ fi
 upgrade_config_file
 
 # Check if the database is already installed
-if php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/isinstalled.php ; then
+if "$php_cmd" "${WEB_PATH}"/admin/cli/isinstalled.php ; then
     install_database
 fi
 
