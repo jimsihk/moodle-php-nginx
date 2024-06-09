@@ -55,7 +55,7 @@ check_db_availability() {
         echo -n '.'
         sleep 1
     done
-    echo -e "\n\nGreat, $db_host is ready!"
+    echo "Great, $db_host is ready!"
 }
 
 # Function to generate config.php file
@@ -132,7 +132,7 @@ upgrade_config_file() {
     # Avoid cron failure by forcing to use database as lock factory
     # https://moodle.org/mod/forum/discuss.php?d=328300#p1320902
     # shellcheck disable=SC2016
-    update_or_add_config_value "\$CFG->lock_factory" "\\core\\lock\\db_record_lock_factory"
+    update_or_add_config_value "\$CFG->lock_factory" "\\\\core\\\\lock\\\\db_record_lock_factory"
 }
 
 # Function to configure Moodle settings via CLI
