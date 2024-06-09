@@ -31,14 +31,16 @@ update_or_add_config_value() {
         # Other values get single-quoted
         quote="'"
     fi
+    
+    # Escape special characters when pass to grep
+    search_key=$(echo $key | sed 's|\[|\\[|g' | sed 's|\]|\\]|g')
 
-    if grep -q "$key" "$config_file"; then
+    if grep -q "search_key" "$config_file"; then
         # If the key exists, replace its value
         sed -i "s|\($key\s*=\s*\)[^;]*;|\1$quote$value$quote;|g" "$config_file"
     else
         # If the key does not exist, add it before "require_once"
         sed -i "/require_once/i $key\t= $quote$value$quote;" "$config_file"
-
     fi
 }
 
@@ -282,7 +284,7 @@ config_file_serving() {
     echo "Configuring file serving..."
     # Offload the file serving from PHP process
     update_or_add_config_value "\$CFG->xsendfile" "X-Accel-Redirect"
-    update_or_add_config_value "\$CFG->xsendfilealiases['/dataroot/'" "\$CFG->dataroot"
+    update_or_add_config_value "\$CFG->xsendfilealiases['/dataroot/']" "\$CFG->dataroot"
     
     if [ -n "$LOCAL_CACHE_DIRECTORY" ]; then
         if [ ! -d "$LOCAL_CACHE_DIRECTORY" ]; then
@@ -290,7 +292,7 @@ config_file_serving() {
             mkdir -p "$LOCAL_CACHE_DIRECTORY"
         fi
         update_or_add_config_value "\$CFG->localcachedir" "$LOCAL_CACHE_DIRECTORY"
-        update_or_add_config_value "\$CFG->xsendfilealiases['/localcachedir/'" "$LOCAL_CACHE_DIRECTORY"
+        update_or_add_config_value "\$CFG->xsendfilealiases['/localcachedir/']" "$LOCAL_CACHE_DIRECTORY"
         cat << EOL >> /etc/nginx/conf.d/default/server/moodle.conf
     location ~ ^/localcachedir/(.*)$ {
         internal;
