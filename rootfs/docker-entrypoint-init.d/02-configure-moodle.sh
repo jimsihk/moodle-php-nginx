@@ -98,6 +98,7 @@ install_database() {
 
 # Function to set extra database settings
 set_extra_db_settings() {
+    echo "Setting database settings in config.php file..."
     if [ -n "$DB_FETCHBUFFERSIZE" ]; then
         update_or_add_config_value "\$CFG->dboptions['fetchbuffersize']" "$DB_FETCHBUFFERSIZE"
     fi
@@ -167,6 +168,7 @@ configure_moodle_settings() {
 
 # Function to perform some final configurations
 final_configurations() {
+    echo "Performing final setup..."
     # Avoid writing the config file
     chmod 444 "$config_file"
 
@@ -206,6 +208,7 @@ upgrade_moodle() {
 # - Check if new volume is mounted that Moodle code directory will be empty
 # - Download the Moodle source code in the same way as specified in DockerFile
 verify_moodle_source() {
+    echo "Checking source code existence..."
     # shellcheck disable=SC2010
     if [ -z "$(ls -A "${WEB_PATH}" | grep -v 'config.php')" ]; then
         echo "Downloading Moodle source codes..."
@@ -276,6 +279,7 @@ config_session_cache() {
 }
 
 config_file_serving() {
+    echo "Configuring file serving..."
     # Offload the file serving from PHP process
     update_or_add_config_value "\$CFG->xsendfile" "X-Accel-Redirect"
     update_or_add_config_value "\$CFG->xsendfilealiases['/dataroot/'" "\$CFG->dataroot"
