@@ -20,13 +20,6 @@ update_or_add_config_value() {
     local noquote
     noquote="$3" # Avoid adding quote
 
-    if [ -z "$value" ]; then
-        # If value is empty, remove the line with the key if it exists
-        echo "Removed $key from config.php"
-        sed -i "/$key/d" "$config_file"
-        return
-    fi
-
     if [ "$value" = 'true' ] || [ "$value" = 'false' ] || [ -n "$noquote" ]; then
         # Handle boolean values without quotes
         quote=''
@@ -36,9 +29,15 @@ update_or_add_config_value() {
     fi
 
     if grep -q "$key" "$config_file"; then
-        # If the key exists, replace its value
-        echo "Updated $key in config.php" #TODO: do not update if no change
-        sed -i "s|\($key\s*=\s*\)[^;]*;|\1$quote$value$quote;|g" "$config_file"
+        if [ -z "$value" ]; then
+            # If value is empty, remove the line with the key if it exists
+            echo "Removed $key from config.php"
+            sed -i "/$key/d" "$config_file"
+        else
+            # If the key exists, replace its value
+            echo "Updated $key in config.php" #TODO: do not update if no change
+            sed -i "s|\($key\s*=\s*\)[^;]*;|\1$quote$value$quote;|g" "$config_file"
+        fi
     else
         # If the key does not exist, add it before "require_once"
         echo "Added $key in config.php"
@@ -58,7 +57,7 @@ check_db_availability() {
         printf '.'
         sleep 1
     done
-    printf "\n\nGreat, $db_host is ready!"
+    printf "\n\nGreat, $db_host is ready!\n"
 }
 
 # Function to generate config.php file
