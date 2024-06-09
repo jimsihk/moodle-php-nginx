@@ -60,7 +60,7 @@ check_db_availability() {
         printf '.'
         sleep 1
     done
-    prinf "\n\nGreat, $db_host is ready!"
+    printf "\n\nGreat, $db_host is ready!"
 }
 
 # Function to generate config.php file
