@@ -50,12 +50,10 @@ check_db_availability() {
     echo "Waiting for $db_host:$db_port to be ready..."
     while ! nc -w 1 "$db_host" "$db_port"; do
         # Show some progress
-        echo -n '.'
+        printf '.'
         sleep 1
     done
-    echo ""
-    echo ""
-    echo "Great, $db_host is ready!"
+    prinf "\n\nGreat, $db_host is ready!"
 }
 
 # Function to generate config.php file
@@ -231,7 +229,7 @@ config_session_cache() {
                 echo "Waiting for $SESSION_CACHE_HOST:$SESSION_CACHE_PORT to be ready..."
                 while ! nc -w 1 "$SESSION_CACHE_HOST" "$SESSION_CACHE_PORT"; do
                     # Show some progress
-                    echo -n '.';
+                    printf '.';
                     sleep 1;
                 done
                 echo "$SESSION_CACHE_HOST is ready"
@@ -250,7 +248,7 @@ config_session_cache() {
                 echo "Waiting for $SESSION_CACHE_HOST:$SESSION_CACHE_PORT to be ready..."
                 while ! nc -w 1 "$SESSION_CACHE_HOST" "$SESSION_CACHE_PORT"; do
                     # Show some progress
-                    echo -n '.';
+                    prinf '.';
                     sleep 1;
                 done
                 echo "$SESSION_CACHE_HOST is ready"
