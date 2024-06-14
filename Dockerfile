@@ -42,7 +42,7 @@ USER nobody
 ARG ARG_MOODLE_GIT_URL='https://github.com/moodle/moodle.git'
 ARG ARG_MODOLE_GIT_BRANCH='MOODLE_404_STABLE'
 # renovate: datasource=git-refs depName=https://github.com/moodle/moodle branch=MOODLE_404_STABLE
-ARG ARG_MODOLE_GIT_COMMIT='db07c09afc52f67a7fa3dc41ba1707ed7f99b58a'
+ARG ARG_MODOLE_GIT_COMMIT='fbed8034ebf535ef177f9447f6abbee3353a6d53'
 ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     MODOLE_GIT_BRANCH=${ARG_MODOLE_GIT_BRANCH} \
     MOODLE_GIT_COMMIT=${ARG_MODOLE_GIT_COMMIT} \
