@@ -12,13 +12,22 @@ cfg_file="${WEB_PATH}"/admin/cli/cfg.php
 #
 
 # Function to update or add a configuration value
+# Usage: update_or_add_config_value <key_name> <new_value> <flag_to_control_adding_single_quote_to_value>
 update_or_add_config_value() {
+    # The configuration key (e.g., $CFG->wwwroot)
     local key
-    key=$(echo "$1" | sed 's|\[|\\[|g' | sed 's|\]|\\]|g' | sed 's|\/|\\/|g')  # The configuration key (e.g., $CFG->wwwroot), need to escape special characters for grep and sed
+    key="$1"
+    # Need to escape special characters for grep and sed
+    local safekey
+    safekey=$(echo "$1" | sed 's|\[|\\[|g' | sed 's|\]|\\]|g' | sed 's|\/|\\/|g')
+    
+    # The new value for the configuration key
     local value
-    value="$2"  # The new value for the configuration key
+    value="$2"
+    
+    # Avoid adding quote
     local noquote
-    noquote="$3" # Avoid adding quote
+    noquote="$3"
 
     if [ "$value" = 'true' ] || [ "$value" = 'false' ] || [ -n "$noquote" ]; then
         # Handle boolean values without quotes
@@ -28,24 +37,44 @@ update_or_add_config_value() {
         quote="'"
     fi
 
-    if grep -q "$key" "$config_file"; then
+    if grep -q "$safekey" "$config_file"; then
         if [ -z "$value" ]; then
             # If value is empty, remove the line with the key if it exists
-            echo "Removed $key from config.php"
-            sed -i "/$key/d" "$config_file"
+            echo '*' "Removed $key from config.php"
+            sed -i "/$safekey/d" "$config_file"
         else
-            # If the key exists, replace its value
-            echo "Updated $key in config.php" #TODO: do not update if no change
-            sed -i "s|\($key\s*=\s*\)[^;]*;|\1$quote$value$quote;|g" "$config_file"
+            check_result=""
+            # Create a temporary PHP script
+            cat << EOF > temp_check_cfg.php
+<?php
+define('CLI_SCRIPT', true);
+require_once('$config_file');
+\$var_name = $key;
+if (isset(\$var_name) && \$var_name === "$value") {
+    echo "MATCH";
+} else {
+    echo "MISMATCH";
+}
+EOF
+            check_result=$(php temp_check_cfg.php)
+            if [ "$check_result" != "MATCH" ]; then
+              # If the key exists but different value, replace its value
+              echo '*' "Updated $key in config.php"
+              sed -i "s|\($safekey\s*=\s*\)[^;]*;|\1$quote$value$quote;|g" "$config_file"
+            else
+              echo '*' "Skipped updating $safekey in config.php as same value"
+            fi
+            rm temp_check_cfg.php
         fi
     else
         # If the key does not exist, add it before "require_once"
-        echo "Added $key in config.php"
-        sed -i "/require_once/i $key\t= $quote$value$quote;" "$config_file"
+        echo '*' "Added $key in config.php"
+        sed -i "/require_once/i $safekey\t= $quote$value$quote;" "$config_file"
     fi
 }
 
 # Function to check the availability of a database
+# Usage: check_db_availability <database_host> <database_port> <database_name>
 check_db_availability() {
     local db_host="$1"
     local db_port="$2"
