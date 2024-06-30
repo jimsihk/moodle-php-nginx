@@ -137,12 +137,13 @@ Define the ENV variables in docker-compose.yml file
 | MAINT_STATUS_KEYWORD        | Status: enabled      | Keyword for detecting Moodle maintenance status when running admin/cli/maintenance.php, language following the Moodle site default language                     |
 | LOCAL_CACHE_DIRECTORY       |                      | Set the path to a local fast filesystem for Moodle local caching that no need to be shared with other instances                                                 |
 | DEBUG                       | false                | Enable debug mode                                                                                                                                               |
+| XSENDFILE                   | true                 | Set to false to disable offloading static file serving to NGINX [X-Accel-Redirect](https://docs.moodle.org/en/Nginx#XSendfile_aka_X-Accel-Redirect)             |
 
 _More settings on PHP and NGINX can refer to the base image https://github.com/jimsihk/alpine-php-nginx/blob/dev/README.md_
 
 ### Important Note about using `AUTO_UPDATE_MOODLE` and `UPDATE_MOODLE_CODE`
 
-If set to `true`, Moodle will be set to [CLI maintenance mode](https://docs.moodle.org/401/en/Maintenance_mode#CLI_maintenance_mode) at container start while performing the update. No user will be able to use Moodle, not even admin.
+If set to `true`, Moodle will be set to [CLI maintenance mode](https://docs.moodle.org/en/Maintenance_mode#CLI_maintenance_mode) at container start while performing the update. No user will be able to use Moodle, not even admin.
 
 If a cluster of Moodle containers are deployed for HA (e.g. on Kubernetes), it is suggested to set both to `false` to avoid unexpected interruption to users when auto scaling, such as adding extra containers to the cluster or container restart for auto healing.
 

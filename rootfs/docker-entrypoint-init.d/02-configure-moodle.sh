@@ -311,8 +311,10 @@ config_session_cache() {
 config_file_serving() {
     echo "Configuring file serving..."
     # Offload the file serving from PHP process
-    update_or_add_config_value "\$CFG->xsendfile" "X-Accel-Redirect"
-    update_or_add_config_value "\$CFG->xsendfilealiases['/dataroot/']" "\$CFG->dataroot" "noquote"
+    if [ -z "$XSENDFILE" ] || [ "$XSENDFILE" = true ]; then
+        update_or_add_config_value "\$CFG->xsendfile" "X-Accel-Redirect"
+        update_or_add_config_value "\$CFG->xsendfilealiases['/dataroot/']" "\$CFG->dataroot" "noquote"
+    fi
     
     if [ -n "$LOCAL_CACHE_DIRECTORY" ]; then
         if [ ! -d "$LOCAL_CACHE_DIRECTORY" ]; then
@@ -320,13 +322,16 @@ config_file_serving() {
             mkdir -p "$LOCAL_CACHE_DIRECTORY"
         fi
         update_or_add_config_value "\$CFG->localcachedir" "$LOCAL_CACHE_DIRECTORY"
-        update_or_add_config_value "\$CFG->xsendfilealiases['/localcachedir/']" "$LOCAL_CACHE_DIRECTORY"
-        cat << EOL >> /etc/nginx/conf.d/default/server/moodle.conf
+
+        if [ -z "$XSENDFILE" ] || [ "$XSENDFILE" = true ]; then
+            update_or_add_config_value "\$CFG->xsendfilealiases['/localcachedir/']" "$LOCAL_CACHE_DIRECTORY"
+            cat << EOL >> /etc/nginx/conf.d/default/server/moodle.conf
     location ~ ^/localcachedir/(.*)$ {
         internal;
         alias $LOCAL_CACHE_DIRECTORY/\$1;
     }
 EOL
+        fi
         echo "Set $LOCAL_CACHE_DIRECTORY as localcachedir"
     fi
 }
