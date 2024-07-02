@@ -46,7 +46,7 @@ update_or_add_config_value() {
             check_result=""
             # Create a temporary PHP script
             if [ "$value" = 'true' ]; then
-              cat << EOF > temp_check_cfg.php
+                cat << EOF > temp_check_cfg.php
 <?php
 define('CLI_SCRIPT', true);
 require_once('$config_file');
@@ -59,7 +59,7 @@ if (isset(\$var_name) && \$var_name === "1") {
 EOF
             else
                 if [ "$value" = 'false' ]; then
-                  cat << EOF > temp_check_cfg.php
+                    cat << EOF > temp_check_cfg.php
 <?php
 define('CLI_SCRIPT', true);
 require_once('$config_file');
@@ -71,7 +71,8 @@ if (isset(\$var_name) && (\$var_name === "0" || empty(\$var_name))) {
 }
 EOF
                 else
-                   cat << EOF > temp_check_cfg.php
+                    # TODO: fix on lock factory with \\ in value
+                    cat << EOF > temp_check_cfg.php
 <?php
 define('CLI_SCRIPT', true);
 require_once('$config_file');
