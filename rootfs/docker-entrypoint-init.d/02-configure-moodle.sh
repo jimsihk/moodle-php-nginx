@@ -45,7 +45,33 @@ update_or_add_config_value() {
         else
             check_result=""
             # Create a temporary PHP script
-            cat << EOF > temp_check_cfg.php
+            if [ "$value" = 'true' ]; then
+              cat << EOF > temp_check_cfg.php
+<?php
+define('CLI_SCRIPT', true);
+require_once('$config_file');
+\$var_name = $key;
+if (isset(\$var_name) && \$var_name === "1") {
+    echo "MATCH";
+} else {
+    echo "MISMATCH";
+}
+EOF
+            else
+                if [ "$value" = 'false' ]; then
+                  cat << EOF > temp_check_cfg.php
+<?php
+define('CLI_SCRIPT', true);
+require_once('$config_file');
+\$var_name = $key;
+if (isset(\$var_name) && (\$var_name === "0" || empty(\$var_name))) {
+    echo "MATCH";
+} else {
+    echo "MISMATCH";
+}
+EOF
+                else
+                   cat << EOF > temp_check_cfg.php
 <?php
 define('CLI_SCRIPT', true);
 require_once('$config_file');
@@ -56,6 +82,8 @@ if (isset(\$var_name) && \$var_name === "$value") {
     echo "MISMATCH";
 }
 EOF
+                fi
+            fi
             check_result=$(php temp_check_cfg.php)
             if [ "$check_result" != "MATCH" ]; then
               # If the key exists but different value, replace its value
