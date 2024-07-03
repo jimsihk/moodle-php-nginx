@@ -354,6 +354,7 @@ config_file_serving() {
 
         if [ -z "$XSENDFILE" ] || [ "$XSENDFILE" = true ]; then
             update_or_add_config_value "\$CFG->xsendfilealiases['/localcachedir/']" "$LOCAL_CACHE_DIRECTORY"
+            # TODO: do not append to nginx config if the configuration is already exist
             cat << EOL >> /etc/nginx/conf.d/default/server/moodle.conf
     location ~ ^/localcachedir/(.*)$ {
         internal;
@@ -390,6 +391,7 @@ if [ ! -f "$config_file" ]; then
 fi
 
 # Upgrade config.php file
+# TODO: add env config to control if updating config.php
 upgrade_config_file
 
 # Check if the database is already installed
