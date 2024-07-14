@@ -2,7 +2,7 @@
 #
 # Moodle configuration script
 #
-set -eo pipefail
+set -e
 
 config_file="${WEB_PATH}"/config.php
 cfg_file="${WEB_PATH}"/admin/cli/cfg.php
@@ -15,18 +15,14 @@ cfg_file="${WEB_PATH}"/admin/cli/cfg.php
 # Usage: update_or_add_config_value <key_name> <new_value> <flag_to_control_adding_single_quote_to_value>
 update_or_add_config_value() {
     # The configuration key (e.g., $CFG->wwwroot)
-    local key
     key="$1"
     # Need to escape special characters for grep and sed
-    local safekey
     safekey=$(echo "$1" | sed 's|\[|\\[|g' | sed 's|\]|\\]|g' | sed 's|\/|\\/|g')
     
     # The new value for the configuration key
-    local value
     value="$2"
     
     # Avoid adding quote
-    local noquote
     noquote="$3"
 
     if [ "$value" = 'true' ] || [ "$value" = 'false' ] || [ -n "$noquote" ]; then
@@ -100,14 +96,16 @@ EOF
         echo '*' "Added $key in config.php"
         sed -i "/require_once/i $safekey\t= $quote$value$quote;" "$config_file"
     fi
+    
+    # reset local variables
+    unset key safekey value noquote
 }
 
 # Function to check the availability of a database
-# Usage: check_db_availability <database_host> <database_port> <database_name>
+# Usage: check_db_availability <database_host> <database_port>
 check_db_availability() {
-    local db_host="$1"
-    local db_port="$2"
-    local db_name="$3"
+    db_host="$1"
+    db_port="$2"
 
     echo "Waiting for $db_host:$db_port to be ready..."
     while ! nc -w 1 "$db_host" "$db_port"; do
@@ -115,7 +113,10 @@ check_db_availability() {
         printf '.'
         sleep 1
     done
-    printf "\n\nGreat, $db_host is ready!\n"
+    printf '\n\nGreat, %s is ready!\n' "$db_host"
+    
+    # reset local variables
+    unset db_host db_port
 }
 
 # Function to generate config.php file
@@ -268,8 +269,7 @@ upgrade_moodle() {
 # - Download the Moodle source code in the same way as specified in DockerFile
 verify_moodle_source() {
     echo "Checking source code existence..."
-    # shellcheck disable=SC2010
-    if [ -z "$(ls -A "${WEB_PATH}" | grep -v 'config.php')" ]; then
+    if ! find "${WEB_PATH}" -mindepth 1 -maxdepth 1 ! -name 'config.php' | grep -q .; then
         echo "Downloading Moodle source codes..."
         /usr/libexec/moodle/download-moodle-code
         if [ ! -f "${WEB_PATH}"/admin/cli/isinstalled.php ]; then
