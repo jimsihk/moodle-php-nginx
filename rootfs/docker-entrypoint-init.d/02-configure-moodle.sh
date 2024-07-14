@@ -97,7 +97,7 @@ EOF
         sed -i "/require_once/i $safekey\t= $quote$value$quote;" "$config_file"
     fi
     
-    # reset local variables
+    # Reset local variables
     unset key safekey value noquote
 }
 
@@ -115,7 +115,7 @@ check_db_availability() {
     done
     printf '\n\nGreat, %s is ready!\n' "$db_host"
     
-    # reset local variables
+    # Reset local variables
     unset db_host db_port
 }
 
@@ -178,6 +178,9 @@ set_extra_db_settings() {
 # Function to upgrade config.php
 upgrade_config_file() {
     echo "Upgrading config.php..."
+    # Make sure config file is editable
+    chmod 660 "$config_file"
+
     update_or_add_config_value "\$CFG->wwwroot" "$SITE_URL"
     update_or_add_config_value "\$CFG->dbtype" "$DB_TYPE"
     update_or_add_config_value "\$CFG->dbhost" "$DB_HOST"
@@ -188,10 +191,9 @@ upgrade_config_file() {
     update_or_add_config_value "\$CFG->reverseproxy" "$REVERSEPROXY"
     update_or_add_config_value "\$CFG->sslproxy" "$SSLPROXY"
     update_or_add_config_value "\$CFG->preventexecpath" "true"
-    
+
     # Avoid cron failure by forcing to use database as lock factory
     # https://moodle.org/mod/forum/discuss.php?d=328300#p1320902
-    # shellcheck disable=SC2016
     update_or_add_config_value "\$CFG->lock_factory" '\\\\core\\\\lock\\\\db_record_lock_factory'
 }
 
@@ -234,6 +236,9 @@ final_configurations() {
 
     # Fix publicpaths check to point to the internal container on port 8080
     sed -i 's/wwwroot/wwwroot\ \. \"\:8080\"/g' lib/classes/check/environment/publicpaths.php
+    
+    # Reset one-off variables
+    unset INITIAL_INSTALL
 }
 
 # Function to upgrade Moodle
@@ -388,11 +393,15 @@ verify_moodle_source
 if [ ! -f "$config_file" ]; then
     generate_config_file
     set_extra_db_settings
+    upgrade_config_file
+else
+    # Update config.php file
+    if [ "$UPDATE_MOODLE_CONFIG_PHP" = true ]; then
+        upgrade_config_file
+    else
+        echo "Skipped upgrading config.php"
+    fi
 fi
-
-# Upgrade config.php file
-# TODO: add env config to control if updating config.php
-upgrade_config_file
 
 # Check if the database is already installed
 if php -d max_input_vars=10000 "${WEB_PATH}"/admin/cli/isinstalled.php ; then

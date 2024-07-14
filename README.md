@@ -133,6 +133,7 @@ Define the ENV variables in docker-compose.yml file
 | SESSION_CACHE_AUTH          |                      | Authentication key for cache store, may be required for redis                                                                                                   |
 | AUTO_UPDATE_MOODLE          | true                 | Set to false to disable performing update of Moodle (e.g. plugins) at docker start                                                                              |
 | UPDATE_MOODLE_CODE          | true                 | Set to false to disable auto download latest patch of Moodle core code, only effective if AUTO_UPDATE_MOODLE is true or built with ARG_ENABLE_GIT_CLONE as true |
+| UPDATE_MOODLE_CONFIG_PHP    | false                | Set to true to allow updating config.php at docker start time                                                                                                   |
 | DISABLE_WEB_INSTALL_PLUGIN  | false                | Set to true to disable plugin installation via site admin UI, could be useful to avoid image outsync with HA setting                                            |
 | MAINT_STATUS_KEYWORD        | Status: enabled      | Keyword for detecting Moodle maintenance status when running admin/cli/maintenance.php, language following the Moodle site default language                     |
 | LOCAL_CACHE_DIRECTORY       |                      | Set the path to a local fast filesystem for Moodle local caching that no need to be shared with other instances                                                 |
