@@ -91,6 +91,7 @@ Define the ENV variables in docker-compose.yml file
 | LANG                        | en_US.UTF-8          |                                                                                                                                                                 |
 | LANGUAGE                    | en_US:en             |                                                                                                                                                                 |
 | SITE_URL                    | http://localhost     | Sets the public site URL                                                                                                                                        |
+| REVERSEPROXY                | false                | Enable when setting up advanced reverse proxy                                                                                                                   |
 | SSLPROXY                    | false                | Disable SSL proxy to avoid site loop. e.g. Cloudflare                                                                                                           |
 | DB_TYPE                     | pgsql                | mysqli - pgsql - mariadb                                                                                                                                        |
 | DB_HOST                     | postgres             | Database hostname e.g. database container name                                                                                                                  |
@@ -133,15 +134,18 @@ Define the ENV variables in docker-compose.yml file
 | SESSION_CACHE_AUTH          |                      | Authentication key for cache store, may be required for redis                                                                                                   |
 | AUTO_UPDATE_MOODLE          | true                 | Set to false to disable performing update of Moodle (e.g. plugins) at docker start                                                                              |
 | UPDATE_MOODLE_CODE          | true                 | Set to false to disable auto download latest patch of Moodle core code, only effective if AUTO_UPDATE_MOODLE is true or built with ARG_ENABLE_GIT_CLONE as true |
+| UPDATE_MOODLE_CONFIG_PHP    | false                | Set to true to allow updating config.php at docker start time                                                                                                   |
 | DISABLE_WEB_INSTALL_PLUGIN  | false                | Set to true to disable plugin installation via site admin UI, could be useful to avoid image outsync with HA setting                                            |
 | MAINT_STATUS_KEYWORD        | Status: enabled      | Keyword for detecting Moodle maintenance status when running admin/cli/maintenance.php, language following the Moodle site default language                     |
 | LOCAL_CACHE_DIRECTORY       |                      | Set the path to a local fast filesystem for Moodle local caching that no need to be shared with other instances                                                 |
+| DEBUG                       | false                | Enable debug mode                                                                                                                                               |
+| XSENDFILE                   | true                 | Set to false to disable offloading static file serving to NGINX [X-Accel-Redirect](https://docs.moodle.org/en/Nginx#XSendfile_aka_X-Accel-Redirect)             |
 
 _More settings on PHP and NGINX can refer to the base image https://github.com/jimsihk/alpine-php-nginx/blob/dev/README.md_
 
 ### Important Note about using `AUTO_UPDATE_MOODLE` and `UPDATE_MOODLE_CODE`
 
-If set to `true`, Moodle will be set to [CLI maintenance mode](https://docs.moodle.org/401/en/Maintenance_mode#CLI_maintenance_mode) at container start while performing the update. No user will be able to use Moodle, not even admin.
+If set to `true`, Moodle will be set to [CLI maintenance mode](https://docs.moodle.org/en/Maintenance_mode#CLI_maintenance_mode) at container start while performing the update. No user will be able to use Moodle, not even admin.
 
 If a cluster of Moodle containers are deployed for HA (e.g. on Kubernetes), it is suggested to set both to `false` to avoid unexpected interruption to users when auto scaling, such as adding extra containers to the cluster or container restart for auto healing.
 
