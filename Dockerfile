@@ -80,7 +80,8 @@ ENV MOODLE_GIT_URL=${ARG_MOODLE_GIT_URL} \
     AUTO_UPDATE_MOODLE=true \
     UPGRADE_MOODLE_CODE=true \
     DISABLE_WEB_INSTALL_PLUGIN=false \
-    MAINT_STATUS_KEYWORD='Status: enabled'
+    MAINT_STATUS_KEYWORD='Status: enabled' \
+    SKIP_MOODLE_CONFIG=false
 
 ARG ARG_REDISSENTINEL_PLUGIN_GIT_URL='https://github.com/catalyst/moodle-cachestore_redissentinel.git'
 ARG ARG_REDISSENTINEL_PLUGIN_GIT_BRANCH='master'

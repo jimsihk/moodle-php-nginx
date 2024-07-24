@@ -4,6 +4,11 @@
 #
 set -eo pipefail
 
+if [ -n "$SKIP_MOODLE_CONFIG" ] && [ "$SKIP_MOODLE_CONFIG" = 'true' ]; then
+  echo "Skipped Moodle configuration"
+  exit 0
+fi
+
 # Check that the database is available
 echo "Waiting for $DB_HOST:$DB_PORT to be ready"
 while ! nc -w 1 "$DB_HOST" "$DB_PORT"; do
