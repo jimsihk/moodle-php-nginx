@@ -136,6 +136,7 @@ Define the ENV variables in docker-compose.yml file
 | DISABLE_WEB_INSTALL_PLUGIN  | false                | Set to true to disable plugin installation via site admin UI, could be useful to avoid image outsync with HA setting                                            |
 | MAINT_STATUS_KEYWORD        | Status: enabled      | Keyword for detecting Moodle maintenance status when running admin/cli/maintenance.php, language following the Moodle site default language                     |
 | LOCAL_CACHE_DIRECTORY       |                      | Set the path to a local fast filesystem for Moodle local caching that no need to be shared with other instances                                                 |
+| SKIP_MOODLE_CONFIG          | false                | Set to true to skip the Moodle configuration script                                                                                                             |
 
 _More settings on PHP and NGINX can refer to the base image https://github.com/jimsihk/alpine-php-nginx/blob/dev/README.md_
 
