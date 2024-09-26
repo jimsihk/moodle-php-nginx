@@ -71,14 +71,14 @@ docker compose up
 Start a Moodle cluster:
 ```
 ./generate_ssl_cert.sh
-docker compose --file docker-compose-replica.yml up
+docker compose --file docker-compose.replica.yml up
 ```
 
 Login on the system using the provided credentials (ENV vars)
 
 #### Sample docker-compose files
 * [docker-compose.yml](docker-compose.yml) - with PostgreSQL
-* [docker-compose-replica.yml](docker-compose.replica.yml) - with PostgreSQL, Redis and multiple Moodle containers, using NGINX as load balancer with SSL termination
+* [docker-compose.replica.yml](docker-compose.replica.yml) - with PostgreSQL, Redis and multiple Moodle containers, using NGINX as load balancer with SSL termination
   * execute `generate_ssl_cert.sh` to generate a sample SSL certificate for localhost
   * refer to https://docs.moodle.org/en/Caching for setting up after login or set the `SESSION_CACHE_*` environment variables
   * please note this setup is NOT configured for production use, use it for demonstration only
