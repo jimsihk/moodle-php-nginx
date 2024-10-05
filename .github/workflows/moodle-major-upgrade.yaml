@@ -71,6 +71,7 @@ jobs:
           echo "version=$TMP_VERSION" >> $GITHUB_OUTPUT
 
       - name: Branch old version
+        if: steps.next_moodle.outputs.ready == 'true'
         uses: peterjgrainger/action-create-branch@v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
