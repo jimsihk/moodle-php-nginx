@@ -6,9 +6,8 @@ on:
 
 jobs:
   check-next-moodle-version:
-    permissions:
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-    continue-on-error: true
+    # permissions:
+      # security-events: write
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -39,9 +38,16 @@ jobs:
           echo "current_branch=$moodle_git_branch" >> $GITHUB_OUTPUT
           echo "next_branch=$next_branch" >> $GITHUB_OUTPUT
 
-      - name: Checkout Moodle source repo
-        uses: actions/checkout@v4
-        with:
-          repository: moodle/moodle
-          path: moodle
-          ref: MOODLE_406_STABLE
+      - name: Check if newer Moodle version
+        id: next_moodle
+        run: |
+          TARGET_BRANCH=${{ steps.moodle_git_repo.output.next_branch }}
+          git ls-remote --exit-code --heads ${{ steps.moodle_git_repo.output.url }} refs/heads/$TARGET_BRANCH >> /dev/null
+          CHECK_RESULT=$?
+
+          if [ "$CHECK_RESULT" -eq 0 ]
+          then
+            echo "$TARGET_BRANCH exist, newer Moodle major/minor version is available"
+          else
+            echo "$TARGET_BRANCH does not exist, no newer Moodle major/minor version yet"
+          fi
