@@ -1,12 +1,8 @@
 name: Check for newer Moodle major and minor version
 
-# on:
-#   schedule:
-#     - cron: '00 22 7,14,21,28 * *' #UTC
-
 on:
-  push:
-    branches: ["feat/auto-pr-moodle-major-upgrade"]
+  schedule:
+    - cron: '00 22 7,14,21,28 * *' #UTC
 
 jobs:
   pr-for-next-moodle-version:
@@ -74,7 +70,7 @@ jobs:
           echo "version=$TMP_VERSION" >> $GITHUB_OUTPUT
 
       - name: Branch old version
-        uses: peterjgrainger/action-create-branch@latest
+        uses: peterjgrainger/action-create-branch@v3.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
