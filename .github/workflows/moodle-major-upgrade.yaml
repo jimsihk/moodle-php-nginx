@@ -4,13 +4,11 @@ on:
   push:
     branches: ["feat/auto-pr-moodle-major-upgrade"]
 
-# env:
-#   IMAGE: ${{ inputs.image }}
-
 jobs:
-  check:
+  check-next-moodle-version:
     permissions:
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -23,17 +21,18 @@ jobs:
         run: |
           input_file=my-repo/Dockerfile
           # Extract values using grep and cut
-          moodle_git_url=$(grep 'ARG_MOODLE_GIT_URL' "$input_file" | cut -d"'" -f2)
-          moodle_git_branch=$(grep 'ARG_MODOLE_GIT_BRANCH' "$input_file" | cut -d"'" -f2)
+          moodle_git_url=$(grep 'ARG ARG_MOODLE_GIT_URL' "$input_file" | cut -d"'" -f2)
+          moodle_git_branch=$(grep 'ARG ARG_MODOLE_GIT_BRANCH' "$input_file" | cut -d"'" -f2)
 
           # Print the extracted values
           echo "Moodle Git URL: $moodle_git_url"
-          echo "Moodle Git Branch: $moodle_git_branch"
+          echo "Current Branch: $moodle_git_branch"
 
           # Compile next branch name
           moodle_version=$(echo $moodle_git_branch | grep -oE '[0-9]+')
           next_version=$((moodle_version + 1))
           next_branch=$(echo $moodle_git_branch | sed "s/$moodle_version/$next_version/")
+          echo "Next Branch: $next_branch"
 
           # Save value for later use
           echo "url=$moodle_git_url" >> $GITHUB_OUTPUT
