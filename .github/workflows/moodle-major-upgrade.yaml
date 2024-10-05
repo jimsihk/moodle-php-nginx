@@ -64,13 +64,13 @@ jobs:
           TMP_VERSION="$TMP_MAJOR.$TMP_MINOR"
           echo "version=$TMP_VERSION" >> $GITHUB_OUTPUT
 
-      - name: Create new branch
-        id: prepare_pr
-        if: steps.next_moodle.outputs.ready == 'true'
-        run: |
-          NEW_BRANCH="feat/${{ steps.next_moodle.outputs.branch }}"
-          git checkout -b "$NEW_BRANCH"
-          echo "branch=$NEW_BRANCH" >> $GITHUB_OUTPUT
+      # - name: Create new branch
+      #   id: prepare_pr
+      #   if: steps.next_moodle.outputs.ready == 'true'
+      #   run: |
+      #     NEW_BRANCH="feat/${{ steps.next_moodle.outputs.branch }}"
+      #     git checkout -b "$NEW_BRANCH"
+      #     echo "branch=$NEW_BRANCH" >> $GITHUB_OUTPUT
 
       - name: Update Dockerfile
         if: steps.next_moodle.outputs.ready == 'true'
@@ -90,7 +90,12 @@ jobs:
           echo "==========================="
 
       - name: Commit and push to new branch
-        run: |
-          COMMIT_MSG="Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"
-          echo "Commit message: $COMMIT_MSG"
-          git commit -a -m "$COMMIT_MSG"
+        if: steps.next_moodle.outputs.ready == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          add-paths: Dockerfile
+          commit-message: "Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"
+          branch: "feat/${{ steps.next_moodle.outputs.branch }}"
+          title: "[Auto] Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"
+          draft: true
+          
