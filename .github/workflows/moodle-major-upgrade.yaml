@@ -1,15 +1,13 @@
 name: Check for newer Moodle major and minor version
 
 on:
-  push:
-    branches: ["feat/auto-pr-moodle-major-upgrade"]
+  schedule:
+    - cron: '00 22 7,14,21,28 * *' #UTC
 
 jobs:
-  check-next-moodle-version:
-    # permissions:
-      # security-events: write
+  pr-for-next-moodle-version:
     runs-on: ubuntu-latest
-    continue-on-error: true
+    continue-on-error: true #ignore git error
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -64,14 +62,6 @@ jobs:
           TMP_VERSION="$TMP_MAJOR.$TMP_MINOR"
           echo "version=$TMP_VERSION" >> $GITHUB_OUTPUT
 
-      # - name: Create new branch
-      #   id: prepare_pr
-      #   if: steps.next_moodle.outputs.ready == 'true'
-      #   run: |
-      #     NEW_BRANCH="feat/${{ steps.next_moodle.outputs.branch }}"
-      #     git checkout -b "$NEW_BRANCH"
-      #     echo "branch=$NEW_BRANCH" >> $GITHUB_OUTPUT
-
       - name: Update Dockerfile
         if: steps.next_moodle.outputs.ready == 'true'
         run: |
@@ -89,13 +79,12 @@ jobs:
           cat $input_file
           echo "==========================="
 
-      - name: Commit and push to new branch
+      - name: Create PR
         if: steps.next_moodle.outputs.ready == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           add-paths: Dockerfile
           commit-message: "Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"
           branch: "feat/${{ steps.next_moodle.outputs.branch }}"
-          title: "[Auto] Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"
-          draft: true
+          title: "Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"
           
