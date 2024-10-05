@@ -57,6 +57,21 @@ jobs:
             echo "ready=false" >> $GITHUB_OUTPUT
           fi
 
+          # Format for commit message
+          TMP_REV=$(echo $next_version | rev)
+          TMP_MINOR=$(echo $TMP_REV | cut -c -2 | rev | sed 's/^0*//')
+          TMP_MAJOR=$(echo $TMP_REV | cut -c 3- | rev)
+          TMP_VERSION="$TMP_MAJOR.$TMP_MINOR"
+          echo "version=$TMP_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Create new branch
+        id: prepare_pr
+        if: steps.next_moodle.outputs.ready == 'true'
+        run: |
+          NEW_BRANCH="feat/${{ steps.next_moodle.outputs.branch }}"
+          git checkout -b "$NEW_BRANCH"
+          echo "branch=$NEW_BRANCH" >> $GITHUB_OUTPUT
+
       - name: Update Dockerfile
         if: steps.next_moodle.outputs.ready == 'true'
         run: |
@@ -69,6 +84,13 @@ jobs:
           sed -i "s/$OLD_BRANCH/$NEW_BRANCH/g" "$input_file"
           sed -i "s/$OLD_COMMIT/$NEW_COMMIT/g" "$input_file"
 
-          echo "========="
+          echo Updated $input_file:
+          echo "==========================="
           cat $input_file
-          echo "========="
+          echo "==========================="
+
+      - name: Commit and push to new branch
+        run: |
+          COMMIT_MSG="Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"
+          echo "Commit message: $COMMIT_MSG"
+          git commit -a -m "$COMMIT_MSG"
