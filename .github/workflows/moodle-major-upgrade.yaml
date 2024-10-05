@@ -1,8 +1,12 @@
 name: Check for newer Moodle major and minor version
 
+# on:
+#   schedule:
+#     - cron: '00 22 7,14,21,28 * *' #UTC
+
 on:
-  schedule:
-    - cron: '00 22 7,14,21,28 * *' #UTC
+  push:
+    branches: ["feat/auto-pr-moodle-major-upgrade"]
 
 jobs:
   pr-for-next-moodle-version:
@@ -30,6 +34,13 @@ jobs:
           echo "url=$moodle_git_url" >> $GITHUB_OUTPUT
           echo "branch=$moodle_git_branch" >> $GITHUB_OUTPUT
           echo "commit=$moodle_git_commit" >> $GITHUB_OUTPUT
+
+          # Format for branching
+          TMP_REV=$(echo $moodle_git_branch | grep -oE '[0-9]+' | rev)
+          TMP_MINOR=$(echo $TMP_REV | cut -c -2 | rev | sed 's/^0*//')
+          TMP_MAJOR=$(echo $TMP_REV | cut -c 3- | rev)
+          TMP_VERSION="$TMP_MAJOR.$TMP_MINOR"
+          echo "version=$TMP_VERSION" >> $GITHUB_OUTPUT
 
       - name: Check if newer Moodle version
         id: next_moodle
@@ -61,6 +72,13 @@ jobs:
           TMP_MAJOR=$(echo $TMP_REV | cut -c 3- | rev)
           TMP_VERSION="$TMP_MAJOR.$TMP_MINOR"
           echo "version=$TMP_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Branch old version
+        uses: peterjgrainger/action-create-branch@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: 'test'
 
       - name: Update Dockerfile
         if: steps.next_moodle.outputs.ready == 'true'
