@@ -74,11 +74,11 @@ jobs:
           echo "version=$TMP_VERSION" >> $GITHUB_OUTPUT
 
       - name: Branch old version
-        uses: peterjgrainger/action-create-branch@v3.0.0
+        uses: peterjgrainger/action-create-branch@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          branch: 'test'
+          branch: ${{ steps.next_moodle.outputs.version }}
 
       - name: Update Dockerfile
         if: steps.next_moodle.outputs.ready == 'true'
