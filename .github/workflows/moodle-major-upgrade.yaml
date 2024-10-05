@@ -1,4 +1,5 @@
-name: Check for newer Moodle major and minor version
+# Check for next major and minor release of Moodle and create PR if detected
+name: Major Release Checker
 
 on:
   schedule:
