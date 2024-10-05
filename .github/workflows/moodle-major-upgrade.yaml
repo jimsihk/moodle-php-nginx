@@ -12,42 +12,62 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          path: my-repo
 
       - name: Retrieve Moodle source configration
-        id: moodle_git_repo
+        id: current_moodle
         run: |
-          input_file=my-repo/Dockerfile
+          input_file=Dockerfile
           # Extract values using grep and cut
           moodle_git_url=$(grep 'ARG ARG_MOODLE_GIT_URL' "$input_file" | cut -d"'" -f2)
           moodle_git_branch=$(grep 'ARG ARG_MODOLE_GIT_BRANCH' "$input_file" | cut -d"'" -f2)
+          moodle_git_commit=$(grep 'ARG ARG_MODOLE_GIT_COMMIT' "$input_file" | cut -d"'" -f2)
 
           # Print the extracted values
           echo "Moodle Git URL: $moodle_git_url"
           echo "Current Branch: $moodle_git_branch"
-
-          # Compile next branch name
-          moodle_version=$(echo $moodle_git_branch | grep -oE '[0-9]+')
-          next_version=$((moodle_version + 1))
-          next_branch=$(echo $moodle_git_branch | sed "s/$moodle_version/$next_version/")
-          echo "Next Branch: $next_branch"
+          echo "Current Commit: $moodle_git_commit"          
 
           # Save value for later use
           echo "url=$moodle_git_url" >> $GITHUB_OUTPUT
-          echo "current_branch=$moodle_git_branch" >> $GITHUB_OUTPUT
-          echo "next_branch=$next_branch" >> $GITHUB_OUTPUT
+          echo "branch=$moodle_git_branch" >> $GITHUB_OUTPUT
+          echo "commit=$moodle_git_commit" >> $GITHUB_OUTPUT
 
       - name: Check if newer Moodle version
         id: next_moodle
         run: |
-          TARGET_BRANCH=${{ steps.moodle_git_repo.output.next_branch }}
-          git ls-remote --exit-code --heads ${{ steps.moodle_git_repo.output.url }} refs/heads/$TARGET_BRANCH >> /dev/null
+          CURRENT_BRANCH=${{ steps.current_moodle.outputs.branch }}
+          # Compile next branch name
+          moodle_version=$(echo $CURRENT_BRANCH | grep -oE '[0-9]+')
+          next_version=$((moodle_version + 1))
+          TARGET_BRANCH=$(echo $CURRENT_BRANCH | sed "s/$moodle_version/$next_version/")
+          echo "Next Branch: $TARGET_BRANCH"
+          
+          RESPONSE=$(git ls-remote --exit-code --heads ${{ steps.current_moodle.output.url }} refs/heads/$TARGET_BRANCH)
           CHECK_RESULT=$?
-
           if [ "$CHECK_RESULT" -eq 0 ]
           then
-            echo "$TARGET_BRANCH exist, newer Moodle major/minor version is available"
+            NEXT_COMMIT=$(echo $RESPONSE | sed 's/\t/ /g' | cut -d' ' -f1)
+            echo "$TARGET_BRANCH ($NEXT_COMMIT) exist, newer Moodle major/minor version is available"
+            echo "ready=true" >> $GITHUB_OUTPUT
+            echo "branch=$TARGET_BRANCH" >> $GITHUB_OUTPUT
+            echo "commit=$NEXT_COMMIT" >> $GITHUB_OUTPUT
           else
             echo "$TARGET_BRANCH does not exist, no newer Moodle major/minor version yet"
+            echo "ready=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Update Dockerfile
+        if: steps.next_moodle.outputs.ready == 'true'
+        run: |
+          input_file=Dockerfile
+          OLD_BRANCH=${{ steps.current_moodle.outputs.branch }}
+          OLD_COMMIT=${{ steps.current_moodle.outputs.commit }}
+          NEW_BRANCH=${{ steps.next_moodle.outputs.branch }}
+          NEW_COMMIT=${{ steps.next_moodle.outputs.commit }}
+          
+          sed -i "s/$OLD_BRANCH/$NEW_BRANCH/g" "$input_file"
+          sed -i "s/$OLD_COMMIT/$NEW_COMMIT/g" "$input_file"
+
+          echo "========="
+          cat $input_file
+          echo "========="
