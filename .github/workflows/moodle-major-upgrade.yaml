@@ -43,7 +43,7 @@ jobs:
           TARGET_BRANCH=$(echo $CURRENT_BRANCH | sed "s/$moodle_version/$next_version/")
           echo "Next Branch: $TARGET_BRANCH"
           
-          RESPONSE=$(git ls-remote --exit-code --heads ${{ steps.current_moodle.output.url }} refs/heads/$TARGET_BRANCH)
+          RESPONSE=$(git ls-remote --exit-code --heads ${{ steps.current_moodle.outputs.url }} refs/heads/$TARGET_BRANCH)
           CHECK_RESULT=$?
           if [ "$CHECK_RESULT" -eq 0 ]
           then
