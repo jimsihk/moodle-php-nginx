@@ -1,0 +1,48 @@
+name: Check for newer Moodle major and minor version
+
+on:
+  push:
+    branches: ["feat/auto-pr-moodle-major-upgrade"]
+
+# env:
+#   IMAGE: ${{ inputs.image }}
+
+jobs:
+  check:
+    permissions:
+      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: my-repo
+
+      - name: Retrieve Moodle source configration
+        id: moodle_git_repo
+        run: |
+          input_file=my-repo/Dockerfile
+          # Extract values using grep and cut
+          moodle_git_url=$(grep 'ARG_MOODLE_GIT_URL' "$input_file" | cut -d"'" -f2)
+          moodle_git_branch=$(grep 'ARG_MODOLE_GIT_BRANCH' "$input_file" | cut -d"'" -f2)
+
+          # Print the extracted values
+          echo "Moodle Git URL: $moodle_git_url"
+          echo "Moodle Git Branch: $moodle_git_branch"
+
+          # Compile next branch name
+          moodle_version=$(echo $moodle_git_branch | grep -oE '[0-9]+')
+          next_version=$((moodle_version + 1))
+          next_branch=$(echo $moodle_git_branch | sed "s/$moodle_version/$next_version/")
+
+          # Save value for later use
+          echo "url=$moodle_git_url" >> $GITHUB_OUTPUT
+          echo "current_branch=$moodle_git_branch" >> $GITHUB_OUTPUT
+          echo "next_branch=$next_branch" >> $GITHUB_OUTPUT
+
+      - name: Checkout Moodle source repo
+        uses: actions/checkout@v4
+        with:
+          repository: moodle/moodle
+          path: moodle
+          ref: MOODLE_406_STABLE
