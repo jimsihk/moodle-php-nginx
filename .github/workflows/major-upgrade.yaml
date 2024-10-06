@@ -2,14 +2,24 @@
 name: Major Release Checker
 
 on:
-  schedule:
-    - cron: '00 22 7,14,21,28 * *' #UTC
+  workflow_call:
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  pr-for-next-moodle-version:
+  pr-for-next-major-release:
     runs-on: ubuntu-latest
     continue-on-error: true #ignore git error
     steps:
+      - name: Generate release token
+        id: generate_release_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private_key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+    
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -21,22 +31,22 @@ jobs:
           moodle_git_url=$(grep 'ARG ARG_MOODLE_GIT_URL' "$input_file" | cut -d"'" -f2)
           moodle_git_branch=$(grep 'ARG ARG_MODOLE_GIT_BRANCH' "$input_file" | cut -d"'" -f2)
           moodle_git_commit=$(grep 'ARG ARG_MODOLE_GIT_COMMIT' "$input_file" | cut -d"'" -f2)
+          # Format Moodle version number
+          TMP_REV=$(echo $moodle_git_branch | grep -oE '[0-9]+' | rev)
+          TMP_MINOR=$(echo $TMP_REV | cut -c -2 | rev | sed 's/^0*//')
+          TMP_MAJOR=$(echo $TMP_REV | cut -c 3- | rev)
+          TMP_VERSION="$TMP_MAJOR.$TMP_MINOR"
 
           # Print the extracted values
           echo "Moodle Git URL: $moodle_git_url"
           echo "Current Branch: $moodle_git_branch"
-          echo "Current Commit: $moodle_git_commit"          
+          echo "Current Commit: $moodle_git_commit"
+          echo "Current release: $TMP_VERSION"
 
           # Save value for later use
           echo "url=$moodle_git_url" >> $GITHUB_OUTPUT
           echo "branch=$moodle_git_branch" >> $GITHUB_OUTPUT
           echo "commit=$moodle_git_commit" >> $GITHUB_OUTPUT
-
-          # Format for branching
-          TMP_REV=$(echo $moodle_git_branch | grep -oE '[0-9]+' | rev)
-          TMP_MINOR=$(echo $TMP_REV | cut -c -2 | rev | sed 's/^0*//')
-          TMP_MAJOR=$(echo $TMP_REV | cut -c 3- | rev)
-          TMP_VERSION="$TMP_MAJOR.$TMP_MINOR"
           echo "version=$TMP_VERSION" >> $GITHUB_OUTPUT
 
       - name: Check if newer Moodle version
@@ -54,21 +64,21 @@ jobs:
           if [ "$CHECK_RESULT" -eq 0 ]
           then
             NEXT_COMMIT=$(echo $RESPONSE | sed 's/\t/ /g' | cut -d' ' -f1)
+            # Format Moodle version number
+            TMP_REV=$(echo $next_version | rev)
+            TMP_MINOR=$(echo $TMP_REV | cut -c -2 | rev | sed 's/^0*//')
+            TMP_MAJOR=$(echo $TMP_REV | cut -c 3- | rev)
+            TMP_VERSION="$TMP_MAJOR.$TMP_MINOR"
+            
             echo "$TARGET_BRANCH ($NEXT_COMMIT) exist, newer Moodle major/minor version is available"
             echo "ready=true" >> $GITHUB_OUTPUT
             echo "branch=$TARGET_BRANCH" >> $GITHUB_OUTPUT
             echo "commit=$NEXT_COMMIT" >> $GITHUB_OUTPUT
+            echo "version=$TMP_VERSION" >> $GITHUB_OUTPUT
           else
             echo "$TARGET_BRANCH does not exist, no newer Moodle major/minor version yet"
             echo "ready=false" >> $GITHUB_OUTPUT
           fi
-
-          # Format for commit message
-          TMP_REV=$(echo $next_version | rev)
-          TMP_MINOR=$(echo $TMP_REV | cut -c -2 | rev | sed 's/^0*//')
-          TMP_MAJOR=$(echo $TMP_REV | cut -c 3- | rev)
-          TMP_VERSION="$TMP_MAJOR.$TMP_MINOR"
-          echo "version=$TMP_VERSION" >> $GITHUB_OUTPUT
 
       - name: Branch old version
         if: steps.next_moodle.outputs.ready == 'true'
@@ -78,28 +88,26 @@ jobs:
         with:
           branch: ${{ steps.current_moodle.outputs.version }}
 
-      - name: Update Dockerfile
+      - name: Update source codes
         if: steps.next_moodle.outputs.ready == 'true'
         run: |
-          input_file=Dockerfile
           OLD_BRANCH=${{ steps.current_moodle.outputs.branch }}
           OLD_COMMIT=${{ steps.current_moodle.outputs.commit }}
+          OLD_VERSION=${{ steps.current_moodle.outputs.version }}
           NEW_BRANCH=${{ steps.next_moodle.outputs.branch }}
           NEW_COMMIT=${{ steps.next_moodle.outputs.commit }}
+          NEW_VERSION=${{ steps.next_moodle.outputs.version }}
           
-          sed -i "s/$OLD_BRANCH/$NEW_BRANCH/g" "$input_file"
-          sed -i "s/$OLD_COMMIT/$NEW_COMMIT/g" "$input_file"
-
-          echo Updated $input_file:
-          echo "==========================="
-          cat $input_file
-          echo "==========================="
+          sed -i "s/$OLD_BRANCH/$NEW_BRANCH/g" Dockerfile
+          sed -i "s/$OLD_COMMIT/$NEW_COMMIT/g" Dockerfile
+          sed -i "s/moodle-$OLD_VERSION/moodle-$NEW_VERSION/g" README.md
 
       - name: Create PR
         if: steps.next_moodle.outputs.ready == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          add-paths: Dockerfile
+          token: ${{ steps.generate_release_token.outputs.token }}
+          add-paths: Dockerfile,README.md
           commit-message: "Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"
           branch: "feat/${{ steps.next_moodle.outputs.branch }}"
           title: "Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"

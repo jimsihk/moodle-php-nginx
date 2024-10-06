@@ -76,3 +76,9 @@ jobs:
           package-type: 'container'
           delete-only-untagged-versions: 'true'
           min-versions-to-keep: 0
+
+  detect-major-release:
+    permissions:
+      contents: write
+      pull-requests: write
+    uses: ./.github/workflows/major-upgrade.yml
