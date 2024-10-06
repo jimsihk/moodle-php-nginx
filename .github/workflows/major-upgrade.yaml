@@ -9,7 +9,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  pr-for-next-moodle-version:
+  pr-for-next-major-release:
     runs-on: ubuntu-latest
     continue-on-error: true #ignore git error
     steps:
