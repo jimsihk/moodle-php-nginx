@@ -2,14 +2,24 @@
 name: Major Release Checker
 
 on:
-  schedule:
-    - cron: '00 22 7,14,21,28 * *' #UTC
+  workflow_call:
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
   pr-for-next-moodle-version:
     runs-on: ubuntu-latest
     continue-on-error: true #ignore git error
     steps:
+      - name: Generate release token
+        id: generate_release_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.RELEASE_BOT_APP_ID }}
+          private_key: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
+    
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -78,28 +88,26 @@ jobs:
         with:
           branch: ${{ steps.current_moodle.outputs.version }}
 
-      - name: Update Dockerfile
+      - name: Update source codes
         if: steps.next_moodle.outputs.ready == 'true'
         run: |
-          input_file=Dockerfile
           OLD_BRANCH=${{ steps.current_moodle.outputs.branch }}
           OLD_COMMIT=${{ steps.current_moodle.outputs.commit }}
+          OLD_VERSION=${{ steps.current_moodle.outputs.version }}
           NEW_BRANCH=${{ steps.next_moodle.outputs.branch }}
           NEW_COMMIT=${{ steps.next_moodle.outputs.commit }}
+          NEW_VERSION=${{ steps.next_moodle.outputs.version }}
           
-          sed -i "s/$OLD_BRANCH/$NEW_BRANCH/g" "$input_file"
-          sed -i "s/$OLD_COMMIT/$NEW_COMMIT/g" "$input_file"
-
-          echo Updated $input_file:
-          echo "==========================="
-          cat $input_file
-          echo "==========================="
+          sed -i "s/$OLD_BRANCH/$NEW_BRANCH/g" Dockerfile
+          sed -i "s/$OLD_COMMIT/$NEW_COMMIT/g" Dockerfile
+          sed -i "s/moodle-$OLD_VERSION/moodle-$NEW_VERSION/g" README.md
 
       - name: Create PR
         if: steps.next_moodle.outputs.ready == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
-          add-paths: Dockerfile
+          token: ${{ steps.generate_release_token.outputs.token }}
+          add-paths: Dockerfile,README.md
           commit-message: "Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"
           branch: "feat/${{ steps.next_moodle.outputs.branch }}"
           title: "Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"
