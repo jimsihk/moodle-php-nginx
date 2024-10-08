@@ -3,6 +3,11 @@ name: Major Release Checker
 
 on:
   workflow_call:
+    secrets:
+      RELEASE_BOT_APP_ID:
+        required: true
+      RELEASE_BOT_PRIVATE_KEY:
+        required: true
 
 permissions:
   contents: write
