@@ -82,3 +82,6 @@ jobs:
       contents: write
       pull-requests: write
     uses: ./.github/workflows/major-upgrade.yml
+    secrets:
+      RELEASE_BOT_APP_ID: ${{ secrets.RELEASE_BOT_APP_ID }}
+      RELEASE_BOT_PRIVATE_KEY: ${{ secrets.RELEASE_BOT_PRIVATE_KEY }}
