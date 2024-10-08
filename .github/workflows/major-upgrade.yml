@@ -3,10 +3,18 @@ name: Major Release Checker
 
 on:
   workflow_call:
+    secrets:
+      RELEASE_BOT_APP_ID:
+        required: true
+      RELEASE_BOT_PRIVATE_KEY:
+        required: true
 
 permissions:
   contents: write
   pull-requests: write
+
+env:
+  BRANCH_NAME_PREFIX: feature
 
 jobs:
   pr-for-next-major-release:
@@ -109,6 +117,6 @@ jobs:
           token: ${{ steps.generate_release_token.outputs.token }}
           add-paths: Dockerfile,README.md
           commit-message: "Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"
-          branch: "feat/${{ steps.next_moodle.outputs.branch }}"
+          branch: "${{ env.BRANCH_NAME_PREFIX }}/${{ steps.next_moodle.outputs.branch }}"
           title: "Upgrade to Moodle ${{ steps.next_moodle.outputs.version }}"
           
