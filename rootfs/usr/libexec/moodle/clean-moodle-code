@@ -1,0 +1,32 @@
+#!/bin/sh
+#
+# Moodle code file clean script
+# Description: The script will remove the unused files which are difficult to hide by Nginx config
+# Parameters: $1: Moodle code directory (e.g. /var/www/html)
+#
+
+if [ -n "$1" ]
+then
+  MOODLE_CODE_PATH="$1"
+  if [ ! -d "${MOODLE_CODE_PATH}" ]; then
+    echo "$MOODLE_CODE_PATH does not exist!"
+    exit 2
+  fi
+  
+  remove_file() {
+    if [ -n "$1" ]; then
+      UNUSED_CODE_FILE="$1"
+      if [ -f "${MOODLE_CODE_PATH}"/"$UNUSED_CODE_FILE" ]; then
+        rm "${MOODLE_CODE_PATH}"/"$UNUSED_CODE_FILE"
+      fi
+    fi
+  }
+  
+  UNUSED_FILE_LIST="Gruntfile.js config-dist.php"
+  for FILE in $UNUSED_FILE_LIST; do
+    remove_file "$FILE"
+  done
+else
+  echo "Missing argument: <moodle_code_path>"
+  exit 1
+fi
