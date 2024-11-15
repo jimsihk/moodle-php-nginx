@@ -12,7 +12,7 @@ services:
       - UPDATE_MOODLE_CODE=false
       - DB_TYPE=pgsql
       - DB_HOST=pgbouncer
-      - DB_PORT=5432
+      - DB_PORT=6432
       - DB_NAME=moodle
       - DB_USER=moodledbuser
       - DB_PASS=moodledbpass
@@ -41,9 +41,7 @@ services:
       - PGBOUNCER_POOL_MODE=session
       #- ADMIN_USERS=moodledbuser
       - PGBOUNCER_IGNORE_STARTUP_PARAMETERS=options,extra_float_digits
-      - PGBOUNCER_PORT=5432
-    ports:
-      - "5432:5432"
+      #- PGBOUNCER_PORT=5432
     depends_on:
       - postgres
 
